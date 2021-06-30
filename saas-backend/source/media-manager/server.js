@@ -44,6 +44,12 @@ var mediaSchema = {
 	}
 };
 
+// Configure Observability with AWS XRay
+var AWSXRay = require('aws-xray-sdk');
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
+app.use(AWSXRay.express.openSegment('media-manager'));
+//AWSXRay.middleware.enableDynamicNaming('*.example.com');
+
 app.get('/media/health', function(req, res) {
 	res.status(200).send({service: 'Media Manager', isAlive: true});
 });
@@ -178,6 +184,8 @@ app.delete('/media/:id', function(req, res) {
 		});
 	});
 });
+
+app.use(AWSXRay.express.closeSegment());
 
 // Start the servers
 app.listen(configuration.port.media);

@@ -1,7 +1,7 @@
 {
   "Name": "product-manager",
   "version": "1.0.0",
-  "description": "Provide basic CRUD operations for porducts",
+  "description": "Provide basic CRUD operations for products",
   "main": "server.js",
   "scripts": {
     "test": "echo \"Error: no tests currently specified\""
@@ -11,7 +11,8 @@
     "config": "latest",
     "express": "latest",
     "uuid": "3.4.0",
-    "winston": "latest"
+    "winston": "latest",
+    "aws-xray-sdk": "latest"
   },
   "author": "Amazon Web Services",
   "contributors": [
@@ -20,6 +21,9 @@
     },
     {
       "name": "Judah Bernstein"
+    },
+    {
+      "name": "Oliver Gibbs"
     }
   ],
   "license": "Apache-2.0"

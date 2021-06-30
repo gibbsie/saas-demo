@@ -11,7 +11,8 @@
     "config": "latest",
     "express": "latest",
     "uuid": "3.4.0",
-    "winston": "latest"
+    "winston": "latest",
+    "aws-xray-sdk": "latest"
   },
   "author": "Amazon Web Services",
   "contributors": [
@@ -20,6 +21,9 @@
     },
     {
       "name": "Judah Bernstein"
+    },
+    {
+      "name": "Oliver Gibbs"
     }
   ],
   "license": "Apache-2.0"

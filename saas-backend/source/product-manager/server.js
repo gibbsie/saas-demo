@@ -44,6 +44,12 @@ var productSchema = {
 	}
 };
 
+// Configure Observability with AWS XRay
+var AWSXRay = require('aws-xray-sdk');
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
+app.use(AWSXRay.express.openSegment('product-manager'));
+//AWSXRay.middleware.enableDynamicNaming('*.example.com');
+
 app.get('/product/health', function(req, res) {
 	res.status(200).send({service: 'Product Manager', isAlive: true});
 });
@@ -178,6 +184,8 @@ app.delete('/product/:id', function(req, res) {
 		});
 	});
 });
+
+app.use(AWSXRay.express.closeSegment());
 
 // Start the servers
 app.listen(configuration.port.product);

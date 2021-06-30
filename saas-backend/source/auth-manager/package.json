@@ -9,6 +9,7 @@
   "dependencies": {
     "amazon-cognito-identity-js": "latest",
     "amazon-cognito-js": "latest",
+    "aws-xray-sdk": "latest",
     "node-fetch": "latest",
     "body-parser": "latest",
     "config": "latest",
@@ -22,6 +23,9 @@
     },
     {
       "name": "Judah Bernstein"
+    },
+    {
+      "name": "Oliver Gibbs"
     }
   ],
   "license": "Apache-2.0"

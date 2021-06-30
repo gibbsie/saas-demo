@@ -430,12 +430,13 @@ Resources:
                   - ecr:UploadLayerPart
                   - ecr:CompleteLayerUpload
                 Resource:
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/user-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/auth-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/media-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/order-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/product-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-registration
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/user-manager
   CodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
@@ -656,12 +657,13 @@ Resources:
                   - ecr:DescribeImages
                   - ecr:BatchDeleteImage
                 Resource:
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/user-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/auth-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/media-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/order-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/product-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-manager
                   - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-registration
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/user-manager
   ClearEcrImagesLogs:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -838,6 +840,27 @@ Resources:
     DependsOn: ApiGateway
     Properties:
       TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/product-service.yml
+      Parameters:
+        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        ArtifactBucket: !Ref ArtifactBucket
+        CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
+        CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
+        CloudWatchEventRoleArn: !GetAtt CloudWatchEventRole.Arn
+        LambdaCodeBuildStartBuildArn: !GetAtt LambdaCodeBuildStartBuild.Arn
+        LambdaClearEcrImagesArn: !GetAtt ClearEcrImagesLambda.Arn
+        VPC: !Ref VPC
+        ALBListener: !Ref ALBListener
+        ECSCluster: !Ref ECSCluster
+        ServiceUrl: !GetAtt ApiGateway.Outputs.ApiGatewayEndpoint
+        ECSSecurityGroup: !Ref ECSSecurityGroup
+        ECSServiceRole: !Ref ECSServiceRole
+        SubnetPrivateA: !Ref SubnetPrivateA
+        SubnetPrivateB: !Ref SubnetPrivateB
+  MediaService:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: ApiGateway
+    Properties:
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/media-service.yml
       Parameters:
         OctankHollywoodBucket: !Ref OctankHollywoodBucket
         ArtifactBucket: !Ref ArtifactBucket

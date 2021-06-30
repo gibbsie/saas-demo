@@ -8,6 +8,7 @@
   },
   "dependencies": {
     "aws-sdk": "latest",
+    "aws-xray-sdk": "latest",
     "body-parser": "latest",
     "config": "latest",
     "express": "latest",
@@ -20,6 +21,9 @@
     },
     {
       "name": "Judah Bernstein"
+    },
+    {
+      "name": "Oliver Gibbs"
     }
   ],
   "license": "Apache-2.0"

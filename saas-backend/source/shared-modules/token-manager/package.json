@@ -7,11 +7,12 @@
     "test": "echo \"Error: no tests currently specified\""
   },
   "dependencies": {
+    "aws-sdk": "latest",
+    "aws-xray-sdk": "latest",
     "jwt-decode": "latest",
     "request": "^2.81.0",
     "async": "latest",
-    "winston": "latest",
-    "aws-sdk": "latest"
+    "winston": "latest"
   },
   "author": "Amazon Web Services",
   "license": "Apache2.0"

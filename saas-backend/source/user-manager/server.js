@@ -74,6 +74,12 @@ var userSchema = {
     ]
 };
 
+// Configure Observability with AWS XRay
+var AWSXRay = require('aws-xray-sdk');
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
+app.use(AWSXRay.express.openSegment('media-manager'));
+//AWSXRay.middleware.enableDynamicNaming('*.example.com');
+
 app.get('/user/health', function (req, res) {
     res.status(200).send('{"service": "User Manager", "isAlive": "true}');
 });
@@ -178,12 +184,12 @@ app.post('/user', function (req, res) {
 
 app.post('/user/create', function (req, res) {
 	var newUser = req.body;
-	
+
 	var credentials = {};
     tokenManager.getSystemCredentials(function (systemCredentials) {
         if (systemCredentials) {
             credentials = systemCredentials;
-            
+
             cognitoUsers.createUser(credentials, newUser, function(err, cognitoUsers) {
 				if (err) {
 					res.status(400).send('{"Error": "Error creating new user"}');
@@ -191,7 +197,7 @@ app.post('/user/create', function (req, res) {
 					res.status(200).send(cognitoUsers);
 				}
 			});
-			
+
         } else {
         	res.status(400).send('{"Error": "Could not retrieve system credentials"}');
         }
@@ -375,10 +381,11 @@ function provisionAdminUserWithRoles(user, credentials, adminPolicyName, userPol
         tenantId: user.tenant_id,
         accountId: configuration.aws_account,
         region: configuration.aws_region,
+        mediaTableName: configuration.table.media,
+        orderTableName: configuration.table.order,
+        productTableName: configuration.table.product,
         tenantTableName: configuration.table.tenant,
         userTableName: configuration.table.user,
-        productTableName: configuration.table.product,
-        orderTableName: configuration.table.order
     };
 
     // init role based on admin policy name
@@ -701,6 +708,7 @@ function getUserPoolIdFromRequest(req) {
     return userPoolId;
 };
 
+app.use(AWSXRay.express.closeSegment());
 
 // Start the service
 app.listen(configuration.port.user);

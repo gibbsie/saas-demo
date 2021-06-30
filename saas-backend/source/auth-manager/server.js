@@ -37,6 +37,12 @@ app.use(function (req, res, next) {
     next();
 });
 
+// Configure Observability with AWS XRay
+var AWSXRay = require('aws-xray-sdk');
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
+app.use(AWSXRay.express.openSegment('auth-manager'));
+//AWSXRay.middleware.enableDynamicNaming('*.example.com');
+
 app.get('/auth/health', function(req, res) {
     res.status(200).send({service: 'Authentication Manager', isAlive: true});
 });
@@ -124,7 +130,7 @@ app.post('/auth', function (req, res) {
     });
 });
 
-
+app.use(AWSXRay.express.closeSegment());
 
 // Start the servers
 app.listen(configuration.port.auth);

@@ -4,7 +4,8 @@
 const jwtDecode = require('jwt-decode');
 const request = require('request');
 const async = require('async');
-const AWS = require('aws-sdk');
+//const AWS = require('aws-sdk');
+var AWS = AWSXRay.captureAWS(require('aws-sdk'));
 
 //Configure Environment
 const configModule = require('../config-helper/config.js');
@@ -285,7 +286,7 @@ module.exports.getInfra = function(input, callback) {
 
 /**
  * Perform an HTTP Request
- * @param protocol sring
+ * @param protocol string
  * @param domain string
  * @param path string
  * @param method string
@@ -410,7 +411,7 @@ function getId(event, callback) {
 
 /**
  * Perform an HTTP Request
- * @param protocol sring
+ * @param protocol string
  * @param domain string
  * @param path string
  * @param method string

@@ -1,7 +1,8 @@
 'use strict';
 
 // Declare dependencies
-const AWS = require('aws-sdk');
+//const AWS = require('aws-sdk');
+var AWS = AWSXRay.captureAWS(require('aws-sdk'));
 const winston = require('winston');
 
 // Configure Environment
@@ -160,8 +161,8 @@ module.exports.createUserPool = function (tenantId) {
 
         // var SnsArn = configuration.role.sns;
         //Invite Message:
-        var inviteMessage = '<img src="https://d0.awsstatic.com/partner-network/logo_apn.png" alt="AWSPartner"> <br><br>Welcome to the SaaS on AWS OctankHollywood. <br><br>Login to the Multi-Tenant Identity Reference Architecture. <br><br>Username: {username} <br><br>Password: {####}';
-        var emailSubject = 'AWS-SaaS-OctankHollywood';
+        var inviteMessage = '<img src="https://d0.awsstatic.com/partner-network/logo_apn.png" alt="AWSPartner"> <br><br>Welcome to Octank Hollywood. <br><br>Username: {username} <br>Password: {####}';
+        var emailSubject = 'Octank Hollywood';
         // init JSON structure with pool settings
         var params = {
             PoolName: tenantId, /* required */
@@ -417,10 +418,11 @@ module.exports.getPolicyTemplate = function(policyType, policyConfig) {
         tenantId: policyConfig.tenantId,
         arnPrefix: arnPrefix,
         cognitoArn: cognitoArn,
-        tenantTableArn: databaseArnPrefix + policyConfig.tenantTableName,
-        userTableArn: databaseArnPrefix + policyConfig.userTableName,
+        mediaTableArn: databaseArnPrefix + policyConfig.mediaTableName,
+        orderTableArn: databaseArnPrefix + policyConfig.orderTableName,
         productTableArn: databaseArnPrefix + policyConfig.productTableName,
-        orderTableArn: databaseArnPrefix + policyConfig.orderTableName
+        userTableArn: databaseArnPrefix + policyConfig.userTableName,
+        tenantTableArn: databaseArnPrefix + policyConfig.tenantTableName
     }
 
     if (policyType === configuration.userRole.systemAdmin) {
@@ -516,6 +518,24 @@ function getTenantAdminPolicy(policyParams) {
                 }
             },
             {
+                "Sid": "TenantAdminMediaTable",
+                "Effect": "Allow",
+                "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:Query",
+                    "dynamodb:PutItem",
+                    "dynamodb:UpdateItem",
+                    "dynamodb:DeleteItem",
+                    "dynamodb:BatchWriteItem",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:CreateTable"
+                ],
+                "Resource": [policyParams.mediaTableArn]
+                // No request conditions because we want the user
+                // to create them in Lab 3
+            },
+            {
                 "Sid": "TenantAdminProductTable",
                 "Effect": "Allow",
                 "Action": [
@@ -529,9 +549,12 @@ function getTenantAdminPolicy(policyParams) {
                     "dynamodb:DescribeTable",
                     "dynamodb:CreateTable"
                 ],
-                "Resource": [policyParams.productTableArn]
-                // No request condiions because we want the user
-                // to create them in Lab 3
+                "Resource": [policyParams.productTableArn],
+                "Condition": {
+                    "ForAllValues:StringEquals": {
+                        "dynamodb:LeadingKeys": [policyParams.tenantId]
+                    }
+                }
             },
             {
                 "Sid": "TenantCognitoAccess",
@@ -601,6 +624,23 @@ function getTenantUserPolicy(policyParams) {
                 }
             },
             {
+                "Sid": "TenantReadOnlyMediaTable",
+                "Effect": "Allow",
+                "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:Query",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:CreateTable"
+                ],
+                "Resource": [policyParams.mediaTableArn],
+                "Condition": {
+                    "ForAllValues:StringEquals": {
+                        "dynamodb:LeadingKeys": [policyParams.tenantId]
+                    }
+                }
+            },
+            {
                 "Sid": "TenantReadOnlyProductTable",
                 "Effect": "Allow",
                 "Action": [
@@ -658,6 +698,15 @@ function getSystemAdminPolicy(policyParams) {
                 "Effect": "Allow",
                 "Action": ["dynamodb:*"],
                 "Resource": [policyParams.orderTableArn]
+            },
+            {
+                "Sid": "TenantSystemAdminMediaTable",
+                "Effect": "Allow",
+                "Action": [
+                    "dynamodb:*",
+                    "dynamodb:DescribeTable"
+                ],
+                "Resource": [policyParams.mediaTableArn]
             },
             {
                 "Sid": "TenantSystemAdminProductTable",
@@ -733,6 +782,19 @@ function getSystemUserPolicy(policyParams) {
                     "dynamodb:CreateTable"
                 ],
                 "Resource": [policyParams.orderTableArn]
+            },
+            {
+                "Sid": "TenantSystemUserMediaTable",
+                "Effect": "Allow",
+                "Action": [
+                    "dynamodb:GetItem",
+                    "dynamodb:BatchGetItem",
+                    "dynamodb:Scan",
+                    "dynamodb:Query",
+                    "dynamodb:DescribeTable",
+                    "dynamodb:CreateTable"
+                ],
+                "Resource": [policyParams.mediaTableArn]
             },
             {
                 "Sid": "TenantSystemUserProductTable",

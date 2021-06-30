@@ -37,6 +37,12 @@ app.use(function (req, res, next) {
     }
 });
 
+// Configure Observability with AWS XRay
+var AWSXRay = require('aws-xray-sdk');
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
+app.use(AWSXRay.express.openSegment('tenant-registration'));
+//AWSXRay.middleware.enableDynamicNaming('*.example.com');
+
 /**
  * Register a new tenant
  */
@@ -66,11 +72,11 @@ app.post('/reg', function (req, res) {
                     tenant.systemSupportRole = tenData.role.systemSupportRole;
                     tenant.systemAdminPolicy = tenData.policy.systemAdminPolicy;
                     tenant.systemSupportPolicy = tenData.policy.systemSupportPolicy;
-					
+
 					// Keep track of where all the users are for this tenant
 					tenant.UserPoolId = tenData.pool.UserPool.Id;
                     tenant.IdentityPoolId = tenData.identityPool.IdentityPoolId;
-					
+
 					// Now save the tenant attributes to our data store
 					// via the Tenant Manager Service
                     saveTenantData(tenant)
@@ -167,13 +173,13 @@ function registerTenantAdmin(tenant) {
 }
 
 /**
- * Save the configration and status of the new tenant
+ * Save the configuration and status of the new tenant
  * @param tenant Data for the tenant to be created
  * @returns {Promise} The created tenant
  */
 function saveTenantData(tenant) {
     var promise = new Promise(function(resolve, reject) {
-        // init the tenant sace request
+        // init the tenant save request
         var tenantRequestData = {
             "tenant_id": tenant.tenant_id,
             "companyName": tenant.companyName,
@@ -217,6 +223,8 @@ function saveTenantData(tenant) {
 app.get('/reg/health', function(req, res) {
     res.status(200).send({service: 'Tenant Registration', isAlive: true});
 });
+
+app.use(AWSXRay.express.closeSegment());
 
 // Start the servers
 app.listen(configuration.port.reg);

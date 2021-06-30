@@ -11,6 +11,7 @@
     "amazon-cognito-js": "latest",
     "async": "^2.6.3",
     "aws-sdk": "latest",
+    "aws-xray-sdk": "latest",
     "body-parser": "latest",
     "config": "latest",
     "express": "latest",

@@ -30,7 +30,7 @@ module.exports.configure = function(environment) {
         case "production":
             if (process.env.AWS_REGION == undefined || process.env.AWS_ACCOUNT_ID == undefined || process.env.SERVICE_URL == undefined) {
                 // || process.env.SNS_ROLE_ARN == undefined
-                var error = "Production Environment Variables Not Properly Configured.\nPlease set AWS_REGION, SERVCE_URL and AWS_ACCOUNT_ID environment variables."
+                var error = "Production Environment Variables Not Properly Configured.\nPlease set AWS_REGION, SERVICE_URL and AWS_ACCOUNT_ID environment variables."
                 throw error;
                 break;
             } else {
@@ -61,12 +61,13 @@ module.exports.configure = function(environment) {
                     port: port,
                     loglevel: prod.log.level,
                     url: {
-                        tenant: process.env.SERVICE_URL + '/tenant',
-                        user: process.env.SERVICE_URL + '/user',
+                        auth: process.env.SERVICE_URL + '/auth',
+                        media: process.env.SERVICE_URL + '/media',
+                        order: process.env.SERVICE_URL + '/order',
                         product: process.env.SERVICE_URL + '/product',
                         reg: process.env.SERVICE_URL + '/reg',
-                        auth: process.env.SERVICE_URL + '/auth',
-                        order: process.env.SERVICE_URL + '/order'
+                        tenant: process.env.SERVICE_URL + '/tenant',
+                        user: process.env.SERVICE_URL + '/user'
                     }
                 }
                 return config;
@@ -92,13 +93,14 @@ module.exports.configure = function(environment) {
                 port: port,
                 loglevel: dev.log.level,
                 url: {
-                    tenant: dev.protocol + dev.domain + ':' + port.tenant + '/tenant',
-                    user: dev.protocol + dev.domain + ':' + port.user +  '/user',
+                    auth: dev.protocol + dev.domain + ':' + port.auth + '/auth',
+                    media: dev.protocol + dev.domain + ':' + port.user + '/media',
+                    order: dev.protocol + dev.domain + ':' + port.order + '/order',
                     product: dev.protocol + dev.domain + ':' + port.product + '/product',
                     reg: dev.protocol + dev.domain + ':' + port.reg + '/reg',
-                    auth: dev.protocol + dev.domain + ':' + port.auth + '/auth',
                     sys: dev.protocol + dev.domain + ':' + port.sys + '/sys',
-                    order: dev.protocol + dev.domain + ':' + port.order + '/order'
+                    tenant: dev.protocol + dev.domain + ':' + port.tenant + '/tenant',
+                    user: dev.protocol + dev.domain + ':' + port.user + '/user'
                 }
             }
             return config;

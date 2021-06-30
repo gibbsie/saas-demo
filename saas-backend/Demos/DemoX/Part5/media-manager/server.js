@@ -52,8 +52,14 @@ var mediaSchema = {
 	}
 };
 
+// Configure Observability with AWS XRay
+var AWSXRay = require('aws-xray-sdk');
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
+app.use(AWSXRay.express.openSegment('auth-manager'));
+//AWSXRay.middleware.enableDynamicNaming('*.example.com');
+
 app.get('/media/health', function(req, res) {
-	res.status(200).send({service: 'Product Manager', isAlive: true});
+	res.status(200).send({service: 'Media Manager', isAlive: true});
 });
 
 // Create REST entry points
@@ -72,7 +78,7 @@ app.get('/media/:id', function (req, res) {
                 winston.error('Error getting media: ' + err.message);
                 res.status(400).send('{"Error" : "Error getting media"}');
             } else {
-                winston.debug('Product ' + req.params.id + ' retrieved');
+                winston.debug('Media ' + req.params.id + ' retrieved');
                 res.status(200).send(media);
             }
         });
@@ -117,7 +123,7 @@ app.post('/media', function(req, res) {
 				winston.error('Error creating new media: ' + err.message);
 				res.status(400).send('{"Error": "Error creating media"}');
 			} else {
-				winston.debug('Product ' + req.body.title + ' created');
+				winston.debug('Media ' + req.body.title + ' created');
 				res.status(200).send({status: 'success'});
 			}
 		});
@@ -164,7 +170,7 @@ app.put('/media', function(req, res) {
 				winston.error('Error updating media: ' + err.message);
 				res.status(400).send('{"Error": "Error updating media"}');
 			} else {
-				winston.debug('Product ' + req.body.title + ' updated');
+				winston.debug('Media ' + req.body.title + ' updated');
 				res.status(200).send(media);
 			}
 		});
@@ -175,7 +181,7 @@ app.delete('/media/:id', function(req, res) {
 	winston.debug('Deleting media: ' + req.params.id);
 	tokenManager.getCredentialsFromToken(req, function (credentials) {
 		// init parameter structure
-		var deleteProductParams = {
+		var deleteMediaParams = {
 			TableName: mediaSchema.TableName,
 			Key: {
 				tenant_id: tenantId,
@@ -184,17 +190,19 @@ app.delete('/media/:id', function(req, res) {
 		};
 		// construct the helper object
 		var dynamoHelper = new DynamoDBHelper(mediaSchema, credentials, configuration);
-		dynamoHelper.deleteItem(deleteProductParams, credentials, function(err, media) {
+		dynamoHelper.deleteItem(deleteMediaParams, credentials, function(err, media) {
 			if (err) {
 				winston.error('Error deleting media: ' + err.message);
 				res.status(400).send('{"Error": "Error deleting media"}');
 			} else {
-				winston.debug('Product ' + req.params.id + ' deleted');
+				winston.debug('Media ' + req.params.id + ' deleted');
 				res.status(200).send({status: 'success'});
 			}
 		});
 	});
 });
+
+app.use(AWSXRay.express.closeSegment());
 
 // Start the servers
 app.listen(configuration.port.media);

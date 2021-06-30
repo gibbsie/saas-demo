@@ -46,6 +46,12 @@ var tenantSchema = {
     }
 };
 
+// Configure Observability with AWS XRay
+var AWSXRay = require('aws-xray-sdk');
+AWSXRay.config([AWSXRay.plugins.ECSPlugin]);
+app.use(AWSXRay.express.openSegment('tenant-manager'));
+//AWSXRay.middleware.enableDynamicNaming('*.example.com');
+
 app.get('/tenant/health', function(req, res) {
     res.status(200).send({service: 'Tenant Manager', isAlive: true});
 });
@@ -197,6 +203,7 @@ app.delete('/tenant/:id', function(req, res) {
     });
 });
 
+app.use(AWSXRay.express.closeSegment());
 
 // Start the servers
 app.listen(configuration.port.tenant);
