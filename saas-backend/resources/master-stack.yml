@@ -5,7 +5,7 @@ Parameters:
   SourceBucket:
     Description: S3 bucket URL to copy objects from
     Type: String
-    Default: aws-octankhollywood-us-east-1
+    Default: saas-octankhollywood-deployment-ap-southeast-2
 Resources:
   OctankHollywoodBucket:
     Type: AWS::S3::Bucket
@@ -150,7 +150,7 @@ Resources:
       Destination: !Ref OctankHollywoodBucket
       DestinationRegion: !Ref AWS::Region
       Objects:
-        - resources/baseline.yml
+        - resources/master-stack.yml
         - resources/api-gateway.yml
         - resources/auth-service.yml
         - resources/tenant-service.yml
