@@ -40,7 +40,7 @@ angular.module('clientApp').controller('MediaEditCtrl', function ($scope, $locat
     $http.put(Constants.MEDIA_MANAGER_URL + '/media', media)
       .then(function(response) {
         console.log('Media updated');
-        $location.path('/media/all');
+        $location.path('/media');
       })
       .catch(function(response) {
         $scope.error = "Error updating media: " + response.message;
@@ -49,6 +49,6 @@ angular.module('clientApp').controller('MediaEditCtrl', function ($scope, $locat
   };
 
   $scope.cancel = function() {
-    $location.path('/media/all');
+    $location.path('/media');
   };
 });

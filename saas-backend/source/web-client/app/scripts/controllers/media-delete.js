@@ -26,7 +26,7 @@ angular.module('clientApp').controller('MediaDeleteCtrl', function ($scope, $loc
     $http.delete(Constants.MEDIA_MANAGER_URL + '/media/' + $scope.media.media_id)
       .then(function (response) {
         console.log('Media delete');
-        $location.path('/media/all');
+        $location.path('/media');
       })
       .catch(function (response) {
         $scope.error = "Error deleting media: " + response.message;
@@ -35,6 +35,6 @@ angular.module('clientApp').controller('MediaDeleteCtrl', function ($scope, $loc
   };
 
   $scope.back = function() {
-    $location.path('/media/all');
+    $location.path('/media');
   };
 });

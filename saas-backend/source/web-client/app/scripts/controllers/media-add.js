@@ -40,6 +40,6 @@ angular.module('clientApp').controller('MediaAddCtrl', function ($scope, $locati
     };
 
     $scope.cancel = function() {
-      $location.path('/media/all');
+      $location.path('/media');
     };
   });

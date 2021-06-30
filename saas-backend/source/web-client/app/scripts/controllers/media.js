@@ -8,7 +8,7 @@
  * Controller of the clientApp
  */
 angular.module('clientApp').controller('MediaCtrl', function ($scope, $http, Constants) {
-  $http.get(Constants.MEDIA_MANAGER_URL + '/media/all')
+  $http.get(Constants.MEDIA_MANAGER_URL + '/media')
     .then(function(response) {
       $scope.media = response.data;
     })
