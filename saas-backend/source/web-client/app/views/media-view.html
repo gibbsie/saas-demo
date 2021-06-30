@@ -1,0 +1,31 @@
+<h3>View Media</h3>
+<form role="form">
+  <div class="form-group">
+    <label class="control-label" for="sku">SKU</label>
+    <p ng-model="media.sku" ng-readonly="true" class="form-control" id="sku">{{media.sku}}</p>
+  </div>
+  <div class="form-group">
+    <label class="control-label" for="title">Title</label>
+    <p ng-model="media.title" ng-readonly="true" class="form-control" id="title">{{media.title}}</p>
+  </div>
+  <div class="form-group">
+    <label class="control-label" for="description">Description</label>
+    <textarea ng-model="media.description" ng-readonly="true" class="form-control" id="description">{{media.description}}</textarea>
+  </div>
+  <div class="form-group">
+    <label class="control-label" for="condition">Condition</label>
+    <p ng-model="media.condition" ng-readonly="true" class="form-control" id="condition">{{media.condition}}</p>
+  </div>
+  <div class="form-group">
+    <label class="control-label" for="conditionDescription">Condition Description</label>
+    <textarea ng-model="media.conditionDescription" ng-readonly="true" class="form-control" id="conditionDescription">{{media.conditionDescription}}</textarea>
+  </div>
+  <div class="form-group">
+    <label class="control-label" for="numberInStock">In Stock</label>
+    <p ng-model="media.numberInStock" ng-readonly="true" class="form-control" id="numberInStock">{{media.numberInStock}}</p>
+  </div>
+  <div class="form-group">
+    <label class="control-label" for="unitCost">Unit Cost</label>
+    <p ng-model="media.unitCost" ng-readonly="true" class="form-control" id="unitCost">{{media.unitCost | currency}}</p>
+  </div>
+</form>
