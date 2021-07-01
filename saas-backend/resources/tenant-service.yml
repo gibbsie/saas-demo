@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Tenant Service
 Parameters:
-  OctankHollywoodBucket:
+  BackendStackBucket:
     Description: The S3 bucket with octankhollywood resources
     Type: String
   ArtifactBucket:
@@ -64,7 +64,7 @@ Resources:
   ECSRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: saas-octankhollywood/tenant-manager
+      RepositoryName: saas-demo/tenant-manager
   InvokeClearEcrRepoImages:
     Type: Custom::CustomResource
     Properties:
@@ -73,15 +73,15 @@ Resources:
   CodeBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/aws/codebuild/saas-octankhollywood-tenant-svc'
+      LogGroupName: '/aws/codebuild/saas-demo-tenant-svc'
       RetentionInDays: 7
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: saas-octankhollywood-tenant-svc
+      Name: saas-demo-tenant-svc
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-tenant-svc
+          Value: saas-demo-tenant-svc
       ServiceRole: !Ref CodeBuildRoleArn
       TimeoutInMinutes: 10
       Artifacts:
@@ -99,7 +99,7 @@ Resources:
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}
           - Name: SAAS_BACKEND_BUCKET
-            Value: !Ref OctankHollywoodBucket
+            Value: !Ref BackendStackBucket
       Source:
         Type: NO_SOURCE
         BuildSpec: |
@@ -113,8 +113,8 @@ Resources:
             build:
               commands:
                 - cd tenant-manager
-                - docker image build -t saas-octankhollywood/tenant-manager -f Dockerfile .
-                - docker tag saas-octankhollywood/tenant-manager:latest ${REPOSITORY_URI}:latest
+                - docker image build -t saas-demo/tenant-manager -f Dockerfile .
+                - docker tag saas-demo/tenant-manager:latest ${REPOSITORY_URI}:latest
                 - cd ../
             post_build:
               commands:
@@ -127,7 +127,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     DependsOn: ECSService
     Properties:
-      Name: saas-octankhollywood-tenant-svc
+      Name: saas-demo-tenant-svc
       RoleArn: !Ref CodePipelineRoleArn
       ArtifactStore:
         Location: !Ref ArtifactBucket
@@ -157,7 +157,7 @@ Resources:
                 Version: 1
               RunOrder: 1
               Configuration:
-                FunctionName: !Sub saas-octankhollywood-update-ecs-${AWS::Region}
+                FunctionName: !Sub saas-demo-update-ecs-${AWS::Region}
                 UserParameters: !Sub '{"cluster":"${ECSCluster}","service":"${ECSService}","desiredCount":1}'
             - Name: DeployAction
               ActionTypeId:
@@ -168,7 +168,7 @@ Resources:
               RunOrder: 2
               Configuration:
                 ClusterName: !Ref ECSCluster
-                ServiceName: saas-octankhollywood-tenant-svc
+                ServiceName: saas-demo-tenant-svc
                 FileName: imagedefinitions.json
               InputArtifacts:
                 - Name: imgdef
@@ -196,12 +196,12 @@ Resources:
       Targets:
         - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
           RoleArn: !Ref CloudWatchEventRoleArn
-          Id: saas-octankhollywood-tenant-svc
+          Id: saas-demo-tenant-svc
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     DependsOn: ECSLogGroup
     Properties:
-      RoleName: saas-octankhollywood-tenant-svc-exec-role
+      RoleName: saas-demo-tenant-svc-exec-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -213,7 +213,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-tenant-svc-exec-policy
+        - PolicyName: saas-demo-tenant-svc-exec-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -240,12 +240,12 @@ Resources:
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/ecs/saas-octankhollywood-tenant-svc'
+      LogGroupName: '/ecs/saas-demo-tenant-svc'
       RetentionInDays: 7
   ECSTaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-tenant-svc-task-role
+      RoleName: saas-demo-tenant-svc-task-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -257,7 +257,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-tenant-svc-task-policy
+        - PolicyName: saas-demo-tenant-svc-task-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -279,7 +279,7 @@ Resources:
       - ECSTaskExecutionRole
       - ECSTaskRole
     Properties:
-      Family: saas-octankhollywood-tenant-svc
+      Family: saas-demo-tenant-svc
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       RequiresCompatibilities:
@@ -309,7 +309,7 @@ Resources:
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: saas-octankhollywood-tenant-svc
+      Name: saas-demo-tenant-svc
       HealthCheckProtocol: HTTP
       HealthCheckPath: '/tenant/health'
       HealthCheckIntervalSeconds: 30
@@ -340,7 +340,7 @@ Resources:
       - ECSTaskDefinition
       - ALBRule
     Properties:
-      ServiceName: saas-octankhollywood-tenant-svc
+      ServiceName: saas-demo-tenant-svc
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
       LaunchType: FARGATE
@@ -364,5 +364,5 @@ Resources:
       - CloudWatchEventRuleForCodePipeline
     Properties:
       ServiceToken: !Ref LambdaCodeBuildStartBuildArn
-      Project: saas-octankhollywood-tenant-svc
+      Project: saas-demo-tenant-svc
 ...

@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Baseline
 Parameters:
-  OctankHollywoodBucket:
+  BackendStackBucket:
     Description: S3 bucket where you uploaded the Lambda code packages for CloudFormation
     Type: String
   ArtifactBucket:
@@ -23,13 +23,13 @@ Resources:
       EnableDnsHostnames: true
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-vpc
+          Value: saas-demo-vpc
   InternetGateway:
     Type: AWS::EC2::InternetGateway
     Properties:
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-igw
+          Value: saas-demo-igw
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
     Properties:
@@ -41,7 +41,7 @@ Resources:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-route-pub
+          Value: saas-demo-route-pub
   RoutePublic:
     Type: AWS::EC2::Route
     DependsOn: AttachGateway
@@ -57,7 +57,7 @@ Resources:
       CidrBlock: 10.0.32.0/19
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-subA-pub
+          Value: saas-demo-subA-pub
   SubnetPublicARouteTable:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -71,7 +71,7 @@ Resources:
       CidrBlock: 10.0.96.0/19
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-subB-pub
+          Value: saas-demo-subB-pub
   SubnetPublicBRouteTable:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -89,14 +89,14 @@ Resources:
       SubnetId: !Ref SubnetPublicA
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-nat-subA-pub
+          Value: saas-demo-nat-subA-pub
   RouteTableNatA:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-route-natA
+          Value: saas-demo-route-natA
   RouteNatA:
     Type: AWS::EC2::Route
     DependsOn: NatGatewayA
@@ -112,7 +112,7 @@ Resources:
       CidrBlock: 10.0.0.0/19
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-subA-priv
+          Value: saas-demo-subA-priv
   SubnetPrivateARouteTable:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -130,14 +130,14 @@ Resources:
       SubnetId: !Ref SubnetPublicB
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-nat-subB-pub
+          Value: saas-demo-nat-subB-pub
   RouteTableNatB:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-route-natB
+          Value: saas-demo-route-natB
   RouteNatB:
     Type: AWS::EC2::Route
     DependsOn: NatGatewayB
@@ -153,7 +153,7 @@ Resources:
       CidrBlock: 10.0.64.0/19
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-subB-priv
+          Value: saas-demo-subB-priv
   SubnetPrivateBRouteTable:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
@@ -167,8 +167,8 @@ Resources:
       InstanceType: t3.medium
       Name: SaaS OctankHollywood IDE
       Repositories:
-        - RepositoryUrl: https://github.com/gibbsie/saas-octankhollywood
-          PathComponent: aws-saas-factory-octankhollywood
+        - RepositoryUrl: https://github.com/gibbsie/saas-demo
+          PathComponent: saas-demo
   CloudTrailBucketPolicy:
     Type: AWS::S3::BucketPolicy
     Properties:
@@ -196,7 +196,7 @@ Resources:
     Type: AWS::CloudTrail::Trail
     DependsOn: CloudTrailBucketPolicy
     Properties:
-      TrailName: saas-octankhollywood-codepipeline-trail
+      TrailName: saas-demo-codepipeline-trail
       S3BucketName: !Ref CloudTrailBucket
       IsLogging: true
       EventSelectors:
@@ -209,12 +209,12 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: saas-octankhollywood
+      ClusterName: saas-demo
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     DependsOn: VPC
     Properties:
-      GroupName: saas-octankhollywood-ecs-sg
+      GroupName: saas-demo-ecs-sg
       GroupDescription: Access to Fargate Containers
       VpcId: !Ref VPC
   ECSSecurityGroupIngress:
@@ -228,12 +228,12 @@ Resources:
       IpProtocol: -1
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-ecs-sg-ingress
+          Value: saas-demo-ecs-sg-ingress
   ALBSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     DependsOn: VPC
     Properties:
-      GroupName: saas-octankhollywood-alb-sg
+      GroupName: saas-demo-alb-sg
       GroupDescription: Access to the load balancer
       VpcId: !Ref VPC
       SecurityGroupIngress:
@@ -256,7 +256,7 @@ Resources:
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: saas-octankhollywood-default-tg
+      Name: saas-demo-default-tg
       Port: 80
       Protocol: HTTP
       TargetType: ip
@@ -273,7 +273,7 @@ Resources:
   ECSServiceRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub saas-octankhollywood-ecs-role-${AWS::Region}
+      RoleName: !Sub saas-demo-ecs-role-${AWS::Region}
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -289,7 +289,7 @@ Resources:
   LambdaCodeBuildStartBuildExecutionRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub saas-octankhollywood-cfn-codebuild-role-${AWS::Region}
+      RoleName: !Sub saas-demo-cfn-codebuild-role-${AWS::Region}
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -301,7 +301,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: !Sub saas-octankhollywood-cfn-codebuild-policy-${AWS::Region}
+        - PolicyName: !Sub saas-demo-cfn-codebuild-policy-${AWS::Region}
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -324,7 +324,7 @@ Resources:
                   - s3:ListBucketVersions
                   - s3:GetBucketVersioning
                 Resource:
-                  - !Sub arn:aws:s3:::${OctankHollywoodBucket}
+                  - !Sub arn:aws:s3:::${BackendStackBucket}
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -332,17 +332,17 @@ Resources:
                   - s3:DeleteObject
                   - s3:DeleteObjectVersion
                 Resource:
-                  - !Sub arn:aws:s3:::${OctankHollywoodBucket}/*
+                  - !Sub arn:aws:s3:::${BackendStackBucket}/*
   LambdaCodeBuildStartBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/saas-octankhollywood-codebuild-start-${AWS::Region}
+      LogGroupName: !Sub /aws/lambda/saas-demo-codebuild-start-${AWS::Region}
       RetentionInDays: 7
   LambdaCodeBuildStartBuild:
     Type: AWS::Lambda::Function
     DependsOn: LambdaCodeBuildStartBuildLogs
     Properties:
-      FunctionName: !Sub saas-octankhollywood-codebuild-start-${AWS::Region}
+      FunctionName: !Sub saas-demo-codebuild-start-${AWS::Region}
       Role: !GetAtt LambdaCodeBuildStartBuildExecutionRole.Arn
       Runtime: python3.7
       Timeout: 60
@@ -372,7 +372,7 @@ Resources:
   CodeBuildRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-codebuild-role
+      RoleName: saas-demo-codebuild-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -384,7 +384,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-codebuild-policy
+        - PolicyName: saas-demo-codebuild-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -399,10 +399,10 @@ Resources:
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
               - Effect: Allow
                 Action:
-                  - s3:listBucket
+                  - s3:ListBucket
                   - s3:GetBucketVersioning
                 Resource:
-                  - !Sub arn:aws:s3:::${OctankHollywoodBucket}
+                  - !Sub arn:aws:s3:::${BackendStackBucket}
                   - !Sub arn:aws:s3:::${ArtifactBucket}
                   - !Sub arn:aws:s3:::${WebsiteBucket}
               - Effect: Allow
@@ -413,7 +413,7 @@ Resources:
                   - s3:GetObject
                   - s3:GetObjectVersion
                 Resource:
-                  - !Sub arn:aws:s3:::${OctankHollywoodBucket}/*
+                  - !Sub arn:aws:s3:::${BackendStackBucket}/*
                   - !Sub arn:aws:s3:::${ArtifactBucket}/*
                   - !Sub arn:aws:s3:::${WebsiteBucket}/*
               - Effect: Allow
@@ -430,17 +430,17 @@ Resources:
                   - ecr:UploadLayerPart
                   - ecr:CompleteLayerUpload
                 Resource:
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/auth-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/media-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/order-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/product-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-registration
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/user-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/auth-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/media-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/order-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/product-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/tenant-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/tenant-registration
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/user-manager
   CodePipelineRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-codepipeline-role
+      RoleName: saas-demo-codepipeline-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -454,7 +454,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AmazonECS_FullAccess
       Policies:
-        - PolicyName: saas-octankhollywood-codepipeline-policy
+        - PolicyName: saas-demo-codepipeline-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -486,11 +486,11 @@ Resources:
                 Action:
                   - lambda:InvokeFunction
                 Resource:
-                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:saas-octankhollywood-update-ecs-${AWS::Region}
+                  - !Sub arn:aws:lambda:${AWS::Region}:${AWS::AccountId}:function:saas-demo-update-ecs-${AWS::Region}
   CodePipelineUpdateEcsServiceExecRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-update-ecs-role
+      RoleName: saas-demo-update-ecs-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -502,7 +502,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-update-ecs-policy
+        - PolicyName: saas-demo-update-ecs-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -526,21 +526,21 @@ Resources:
                   - ecs:DescribeServices
                   - ecs:UpdateService
                 Resource:
-                  - !Sub arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:service/saas-octankhollywood*
+                  - !Sub arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:service/saas-demo*
                 Condition:
                   StringLike:
                     ecs:cluster:
-                      - !Sub arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/saas-octankhollywood
+                      - !Sub arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/saas-demo
   CodePipelineUpdateEcsServiceLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/saas-octankhollywood-update-ecs-${AWS::Region}
+      LogGroupName: !Sub /aws/lambda/saas-demo-update-ecs-${AWS::Region}
       RetentionInDays: 7
   CodePipelineUpdateEcsServiceLambda:
     Type: AWS::Lambda::Function
     DependsOn: CodePipelineUpdateEcsServiceLogs
     Properties:
-      FunctionName: !Sub saas-octankhollywood-update-ecs-${AWS::Region}
+      FunctionName: !Sub saas-demo-update-ecs-${AWS::Region}
       Role: !GetAtt CodePipelineUpdateEcsServiceExecRole.Arn
       Runtime: python3.7
       Timeout: 300
@@ -603,7 +603,7 @@ Resources:
   CloudWatchEventRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub saas-octankhollywood-event-role-${AWS::Region}
+      RoleName: !Sub saas-demo-event-role-${AWS::Region}
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -615,7 +615,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: !Sub saas-octankhollywood-event-policy-${AWS::Region}
+        - PolicyName: !Sub saas-demo-event-policy-${AWS::Region}
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -626,7 +626,7 @@ Resources:
   ClearEcrImagesExecRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-clear-ecr-role
+      RoleName: saas-demo-clear-ecr-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -638,7 +638,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-clear-ecr-policy
+        - PolicyName: saas-demo-clear-ecr-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -657,23 +657,23 @@ Resources:
                   - ecr:DescribeImages
                   - ecr:BatchDeleteImage
                 Resource:
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/auth-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/media-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/order-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/product-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-manager
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/tenant-registration
-                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-octankhollywood/user-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/auth-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/media-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/order-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/product-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/tenant-manager
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/tenant-registration
+                  - !Sub arn:aws:ecr:${AWS::Region}:${AWS::AccountId}:repository/saas-demo/user-manager
   ClearEcrImagesLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/saas-octankhollywood-clear-ecr-${AWS::Region}
+      LogGroupName: !Sub /aws/lambda/saas-demo-clear-ecr-${AWS::Region}
       RetentionInDays: 7
   ClearEcrImagesLambda:
     Type: AWS::Lambda::Function
     DependsOn: ClearEcrImagesLogs
     Properties:
-      FunctionName: !Sub saas-octankhollywood-clear-ecr-${AWS::Region}
+      FunctionName: !Sub saas-demo-clear-ecr-${AWS::Region}
       Role: !GetAtt ClearEcrImagesExecRole.Arn
       Runtime: python3.7
       Timeout: 300
@@ -727,16 +727,16 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ECSLoadBalancer
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/api-gateway.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/api-gateway.yml
       Parameters:
         ECSLoadBalancer: !GetAtt ECSLoadBalancer.DNSName
   UserService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/user-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/user-service.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -755,9 +755,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/auth-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/auth-service.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -776,9 +776,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/tenant-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/tenant-service.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -797,9 +797,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/registration-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/registration-service.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -818,9 +818,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/order-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/order-service.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -839,9 +839,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/product-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/product-service.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -860,9 +860,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/media-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/media-service.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -881,9 +881,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/web-client.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/web-client.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         WebsiteBucket: !Ref WebsiteBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         LambdaCodeBuildStartBuildArn: !GetAtt LambdaCodeBuildStartBuild.Arn

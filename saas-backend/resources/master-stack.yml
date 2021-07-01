@@ -5,16 +5,16 @@ Parameters:
   SourceBucket:
     Description: S3 bucket URL to copy objects from
     Type: String
-    Default: saas-octankhollywood-deployment-ap-southeast-2
+    Default: saas-demo-deployment-ap-southeast-2
 Resources:
-  OctankHollywoodBucket:
+  BackendStackBucket:
     Type: AWS::S3::Bucket
-  OctankHollywoodBucketSsmParam:
+  BackendStackBucketSsmParam:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Sub saas-octankhollywood-bucket-${AWS::Region}
+      Name: !Sub saas-demo-cfnbucket-${AWS::Region}
       Type: String
-      Value: !Ref OctankHollywoodBucket
+      Value: !Ref BackendStackBucket
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -22,7 +22,7 @@ Resources:
         IndexDocument: index.html
       Tags:
         - Key: Name
-          Value: !Sub saas-octankhollywood-website-bucket-${AWS::Region}
+          Value: !Sub saas-demo-website-bucket-${AWS::Region}
   ArtifactBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -30,18 +30,18 @@ Resources:
         Status: Enabled
       Tags:
         - Key: Name
-          Value: !Sub saas-octankhollywood-artifact-bucket-${AWS::Region}
+          Value: !Sub saas-demo-artifact-bucket-${AWS::Region}
   CloudTrailBucket:
     Type: AWS::S3::Bucket
     Properties:
       Tags:
         - Key: Name
-          Value: !Sub saas-octankhollywood-cloudtrail-bucket-${AWS::Region}
+          Value: !Sub saas-demo-cloudtrail-bucket-${AWS::Region}
   S3ObjectsExecutionRole:
     Type: AWS::IAM::Role
-    DependsOn: OctankHollywoodBucket
+    DependsOn: BackendStackBucket
     Properties:
-      RoleName: !Sub saas-octankhollywood-s3-copy-role-${AWS::Region}
+      RoleName: !Sub saas-demo-s3-copy-role-${AWS::Region}
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -53,7 +53,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: !Sub saas-octankhollywood-s3-copy-policy-${AWS::Region}
+        - PolicyName: !Sub saas-demo-s3-copy-policy-${AWS::Region}
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -78,7 +78,7 @@ Resources:
                   - s3:ListBucketVersions
                   - s3:GetBucketVersioning
                 Resource:
-                  - !Sub arn:aws:s3:::${OctankHollywoodBucket}
+                  - !Sub arn:aws:s3:::${BackendStackBucket}
                   - !Sub arn:aws:s3:::${ArtifactBucket}
                   - !Sub arn:aws:s3:::${CloudTrailBucket}
                   - !Sub arn:aws:s3:::${WebsiteBucket}
@@ -88,21 +88,21 @@ Resources:
                   - s3:DeleteObject
                   - s3:DeleteObjectVersion
                 Resource:
-                  - !Sub arn:aws:s3:::${OctankHollywoodBucket}/*
+                  - !Sub arn:aws:s3:::${BackendStackBucket}/*
                   - !Sub arn:aws:s3:::${ArtifactBucket}/*
                   - !Sub arn:aws:s3:::${CloudTrailBucket}/*
                   - !Sub arn:aws:s3:::${WebsiteBucket}/*
   CopyS3ObjectsLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/saas-octankhollywood-s3-copy-${AWS::Region}
+      LogGroupName: !Sub /aws/lambda/saas-demo-s3-copy-${AWS::Region}
       RetentionInDays: 7
   CopyS3Objects:
     Type: AWS::Lambda::Function
     DependsOn:
       - S3ObjectsExecutionRole
     Properties:
-      FunctionName: !Sub saas-octankhollywood-s3-copy-${AWS::Region}
+      FunctionName: !Sub saas-demo-s3-copy-${AWS::Region}
       Role: !GetAtt S3ObjectsExecutionRole.Arn
       Runtime: python3.7
       Timeout: 600
@@ -143,21 +143,22 @@ Resources:
     DependsOn:
       - CopyS3Objects
       - CopyS3ObjectsLogs
-      - OctankHollywoodBucket
+      - BackendStackBucket
     Properties:
       ServiceToken: !GetAtt CopyS3Objects.Arn
       Source: !Ref SourceBucket
-      Destination: !Ref OctankHollywoodBucket
+      Destination: !Ref BackendStackBucket
       DestinationRegion: !Ref AWS::Region
       Objects:
-        - resources/master-stack.yml
+        - resources/baseline.yml
         - resources/api-gateway.yml
         - resources/auth-service.yml
-        - resources/tenant-service.yml
-        - resources/user-service.yml
-        - resources/registration-service.yml
+        - resources/media-service.yml
         - resources/order-service.yml
         - resources/product-service.yml
+        - resources/registration-service.yml
+        - resources/tenant-service.yml
+        - resources/user-service.yml
         - resources/web-client.yml
         - source/shared-modules/config-helper/config.js
         - source/shared-modules/config-helper/package.json
@@ -255,12 +256,12 @@ Resources:
   ClearS3BucketLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: !Sub /aws/lambda/saas-octankhollywood-s3-clear-${AWS::Region}
+      LogGroupName: !Sub /aws/lambda/saas-demo-s3-clear-${AWS::Region}
       RetentionInDays: 7
   ClearS3Bucket:
     Type: AWS::Lambda::Function
     Properties:
-      FunctionName: !Sub saas-octankhollywood-s3-clear-${AWS::Region}
+      FunctionName: !Sub saas-demo-s3-clear-${AWS::Region}
       Role: !GetAtt S3ObjectsExecutionRole.Arn
       Runtime: python3.7
       Timeout: 900
@@ -341,10 +342,10 @@ Resources:
     DependsOn:
       - ClearS3BucketLogs
       - ClearS3Bucket
-      - OctankHollywoodBucket
+      - BackendStackBucket
     Properties:
       ServiceToken: !GetAtt ClearS3Bucket.Arn
-      Bucket: !Ref OctankHollywoodBucket
+      Bucket: !Ref BackendStackBucket
   InvokeLambdaClearArtifactBucket:
     Type: Custom::CustomResource
     DependsOn:
@@ -376,9 +377,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: InvokeLambdaCopyS3Objects
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${OctankHollywoodBucket}/resources/baseline.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/baseline.yml
       Parameters:
-        OctankHollywoodBucket: !Ref OctankHollywoodBucket
+        BackendStackBucket: !Ref BackendStackBucket
         ArtifactBucket: !Ref ArtifactBucket
         CloudTrailBucket: !Ref CloudTrailBucket
         WebsiteBucket: !Ref WebsiteBucket

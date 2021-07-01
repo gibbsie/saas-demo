@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Web Client
 Parameters:
-  OctankHollywoodBucket:
+  BackendStackBucket:
     Description: The S3 bucket with octankhollywood resources
     Type: String
   WebsiteBucket:
@@ -87,15 +87,15 @@ Resources:
   CodeBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/aws/codebuild/saas-octankhollywood-web-client'
+      LogGroupName: '/aws/codebuild/saas-demo-web-client'
       RetentionInDays: 7
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: saas-octankhollywood-web-client
+      Name: saas-demo-web-client
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-web-client
+          Value: saas-demo-web-client
       ServiceRole: !Ref CodeBuildRoleArn
       TimeoutInMinutes: 10
       Artifacts:
@@ -106,7 +106,7 @@ Resources:
         Type: LINUX_CONTAINER
         EnvironmentVariables:
           - Name: SAAS_BACKEND_BUCKET
-            Value: !Ref OctankHollywoodBucket
+            Value: !Ref BackendStackBucket
           - Name: WEBSITE_BUCKET
             Value: !Ref WebsiteBucket
           - Name: SERVICE_URL
@@ -137,5 +137,5 @@ Resources:
       - CodeBuildProject
     Properties:
       ServiceToken: !Ref LambdaCodeBuildStartBuildArn
-      Project: saas-octankhollywood-web-client
+      Project: saas-demo-web-client
 ...

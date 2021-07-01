@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Media Service
 Parameters:
-  OctankHollywoodBucket:
+  BackendStackBucket:
     Description: The S3 bucket with octankhollywood resources
     Type: String
   ArtifactBucket:
@@ -51,7 +51,7 @@ Resources:
   ECSRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: saas-octankhollywood/media-manager
+      RepositoryName: saas-demo/media-manager
   InvokeClearEcrRepoImages:
     Type: Custom::CustomResource
     Properties:
@@ -60,15 +60,15 @@ Resources:
   CodeBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/aws/codebuild/saas-octankhollywood-media-svc'
+      LogGroupName: '/aws/codebuild/saas-demo-media-svc'
       RetentionInDays: 7
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: saas-octankhollywood-media-svc
+      Name: saas-demo-media-svc
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-media-svc
+          Value: saas-demo-media-svc
       ServiceRole: !Ref CodeBuildRoleArn
       TimeoutInMinutes: 10
       Artifacts:
@@ -86,7 +86,7 @@ Resources:
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}
           - Name: SAAS_BACKEND_BUCKET
-            Value: !Ref OctankHollywoodBucket
+            Value: !Ref BackendStackBucket
       Source:
         Type: NO_SOURCE
         BuildSpec: |
@@ -100,8 +100,8 @@ Resources:
             build:
               commands:
                 - cd media-manager
-                - docker image build -t saas-octankhollywood/media-manager -f Dockerfile .
-                - docker tag saas-octankhollywood/media-manager:latest ${REPOSITORY_URI}:latest
+                - docker image build -t saas-demo/media-manager -f Dockerfile .
+                - docker tag saas-demo/media-manager:latest ${REPOSITORY_URI}:latest
                 - cd ../
             post_build:
               commands:
@@ -114,7 +114,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     DependsOn: ECSService
     Properties:
-      Name: saas-octankhollywood-media-svc
+      Name: saas-demo-media-svc
       RoleArn: !Ref CodePipelineRoleArn
       ArtifactStore:
         Location: !Ref ArtifactBucket
@@ -144,7 +144,7 @@ Resources:
                 Version: 1
               RunOrder: 1
               Configuration:
-                FunctionName: !Sub saas-octankhollywood-update-ecs-${AWS::Region}
+                FunctionName: !Sub saas-demo-update-ecs-${AWS::Region}
                 UserParameters: !Sub '{"cluster":"${ECSCluster}","service":"${ECSService}","desiredCount":1}'
             - Name: DeployAction
               ActionTypeId:
@@ -155,7 +155,7 @@ Resources:
               RunOrder: 2
               Configuration:
                 ClusterName: !Ref ECSCluster
-                ServiceName: saas-octankhollywood-media-svc
+                ServiceName: saas-demo-media-svc
                 FileName: imagedefinitions.json
               InputArtifacts:
                 - Name: imgdef
@@ -183,7 +183,7 @@ Resources:
       Targets:
         - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
           RoleArn: !Ref CloudWatchEventRoleArn
-          Id: saas-octankhollywood-media-svc
+          Id: saas-demo-media-svc
   CodePipelineExecutionStateChangeEvent:
     Type: AWS::Events::Rule
     Properties:
@@ -202,11 +202,11 @@ Resources:
       State: ENABLED
       Targets:
         - Arn: !GetAtt CodePipelineMonitorQueue.Arn
-          Id: saas-octankhollywood-media-svc
+          Id: saas-demo-media-svc
   CodePipelineMonitorQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: saas-octankhollywood-media-svc
+      QueueName: saas-demo-media-svc
   CodePipelineMonitorQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
@@ -224,14 +224,14 @@ Resources:
   CodePipelineMonitorQueueSsmParam:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Sub saas-octankhollywood-ci-cd-queue-${AWS::Region}
+      Name: !Sub saas-demo-ci-cd-queue-${AWS::Region}
       Type: String
       Value: !Ref CodePipelineMonitorQueue
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     DependsOn: ECSLogGroup
     Properties:
-      RoleName: saas-octankhollywood-media-svc-exec-role
+      RoleName: saas-demo-media-svc-exec-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -243,7 +243,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-media-svc-exec-policy
+        - PolicyName: saas-demo-media-svc-exec-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -270,12 +270,12 @@ Resources:
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/ecs/saas-octankhollywood-media-svc'
+      LogGroupName: '/ecs/saas-demo-media-svc'
       RetentionInDays: 7
   ECSTaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-media-svc-task-role
+      RoleName: saas-demo-media-svc-task-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -287,7 +287,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-media-svc-task-policy
+        - PolicyName: saas-demo-media-svc-task-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -309,7 +309,7 @@ Resources:
       - ECSTaskExecutionRole
       - ECSTaskRole
     Properties:
-      Family: saas-octankhollywood-media-svc
+      Family: saas-demo-media-svc
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       RequiresCompatibilities:
@@ -339,7 +339,7 @@ Resources:
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: saas-octankhollywood-media-svc
+      Name: saas-demo-media-svc
       HealthCheckProtocol: HTTP
       HealthCheckPath: '/media/health'
       HealthCheckIntervalSeconds: 10
@@ -370,7 +370,7 @@ Resources:
       - ECSTaskDefinition
       - ALBRule
     Properties:
-      ServiceName: saas-octankhollywood-media-svc
+      ServiceName: saas-demo-media-svc
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
       LaunchType: FARGATE
@@ -396,5 +396,5 @@ Resources:
 #      - CloudWatchEventRuleForCodePipeline
 #    Properties:
 #      ServiceToken: !Ref LambdaCodeBuildStartBuildArn
-#      Project: saas-octankhollywood-media-svc
+#      Project: saas-demo-media-svc
 ...

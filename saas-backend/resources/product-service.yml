@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Product Service
 Parameters:
-  OctankHollywoodBucket:
+  BackendStackBucket:
     Description: The S3 bucket with octankhollywood resources
     Type: String
   ArtifactBucket:
@@ -51,7 +51,7 @@ Resources:
   ECSRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: saas-octankhollywood/product-manager
+      RepositoryName: saas-demo/product-manager
   InvokeClearEcrRepoImages:
     Type: Custom::CustomResource
     Properties:
@@ -60,15 +60,15 @@ Resources:
   CodeBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/aws/codebuild/saas-octankhollywood-product-svc'
+      LogGroupName: '/aws/codebuild/saas-demo-product-svc'
       RetentionInDays: 7
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: saas-octankhollywood-product-svc
+      Name: saas-demo-product-svc
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-product-svc
+          Value: saas-demo-product-svc
       ServiceRole: !Ref CodeBuildRoleArn
       TimeoutInMinutes: 10
       Artifacts:
@@ -86,7 +86,7 @@ Resources:
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}
           - Name: SAAS_BACKEND_BUCKET
-            Value: !Ref OctankHollywoodBucket
+            Value: !Ref BackendStackBucket
       Source:
         Type: NO_SOURCE
         BuildSpec: |
@@ -100,8 +100,8 @@ Resources:
             build:
               commands:
                 - cd product-manager
-                - docker image build -t saas-octankhollywood/product-manager -f Dockerfile .
-                - docker tag saas-octankhollywood/product-manager:latest ${REPOSITORY_URI}:latest
+                - docker image build -t saas-demo/product-manager -f Dockerfile .
+                - docker tag saas-demo/product-manager:latest ${REPOSITORY_URI}:latest
                 - cd ../
             post_build:
               commands:
@@ -114,7 +114,7 @@ Resources:
     Type: AWS::CodePipeline::Pipeline
     DependsOn: ECSService
     Properties:
-      Name: saas-octankhollywood-product-svc
+      Name: saas-demo-product-svc
       RoleArn: !Ref CodePipelineRoleArn
       ArtifactStore:
         Location: !Ref ArtifactBucket
@@ -144,7 +144,7 @@ Resources:
                 Version: 1
               RunOrder: 1
               Configuration:
-                FunctionName: !Sub saas-octankhollywood-update-ecs-${AWS::Region}
+                FunctionName: !Sub saas-demo-update-ecs-${AWS::Region}
                 UserParameters: !Sub '{"cluster":"${ECSCluster}","service":"${ECSService}","desiredCount":1}'
             - Name: DeployAction
               ActionTypeId:
@@ -155,7 +155,7 @@ Resources:
               RunOrder: 2
               Configuration:
                 ClusterName: !Ref ECSCluster
-                ServiceName: saas-octankhollywood-product-svc
+                ServiceName: saas-demo-product-svc
                 FileName: imagedefinitions.json
               InputArtifacts:
                 - Name: imgdef
@@ -183,7 +183,7 @@ Resources:
       Targets:
         - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
           RoleArn: !Ref CloudWatchEventRoleArn
-          Id: saas-octankhollywood-product-svc
+          Id: saas-demo-product-svc
   CodePipelineExecutionStateChangeEvent:
     Type: AWS::Events::Rule
     Properties:
@@ -202,11 +202,11 @@ Resources:
       State: ENABLED
       Targets:
         - Arn: !GetAtt CodePipelineMonitorQueue.Arn
-          Id: saas-octankhollywood-product-svc
+          Id: saas-demo-product-svc
   CodePipelineMonitorQueue:
     Type: AWS::SQS::Queue
     Properties:
-      QueueName: saas-octankhollywood-product-svc
+      QueueName: saas-demo-product-svc
   CodePipelineMonitorQueuePolicy:
     Type: AWS::SQS::QueuePolicy
     Properties:
@@ -224,14 +224,14 @@ Resources:
   CodePipelineMonitorQueueSsmParam:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Sub saas-octankhollywood-ci-cd-queue-${AWS::Region}
+      Name: !Sub saas-demo-ci-cd-queue-${AWS::Region}
       Type: String
       Value: !Ref CodePipelineMonitorQueue
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     DependsOn: ECSLogGroup
     Properties:
-      RoleName: saas-octankhollywood-product-svc-exec-role
+      RoleName: saas-demo-product-svc-exec-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -243,7 +243,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-product-svc-exec-policy
+        - PolicyName: saas-demo-product-svc-exec-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -270,12 +270,12 @@ Resources:
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/ecs/saas-octankhollywood-product-svc'
+      LogGroupName: '/ecs/saas-demo-product-svc'
       RetentionInDays: 7
   ECSTaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-product-svc-task-role
+      RoleName: saas-demo-product-svc-task-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -287,7 +287,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-product-svc-task-policy
+        - PolicyName: saas-demo-product-svc-task-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -309,7 +309,7 @@ Resources:
       - ECSTaskExecutionRole
       - ECSTaskRole
     Properties:
-      Family: saas-octankhollywood-product-svc
+      Family: saas-demo-product-svc
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       RequiresCompatibilities:
@@ -339,7 +339,7 @@ Resources:
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: saas-octankhollywood-product-svc
+      Name: saas-demo-product-svc
       HealthCheckProtocol: HTTP
       HealthCheckPath: '/product/health'
       HealthCheckIntervalSeconds: 10
@@ -370,7 +370,7 @@ Resources:
       - ECSTaskDefinition
       - ALBRule
     Properties:
-      ServiceName: saas-octankhollywood-product-svc
+      ServiceName: saas-demo-product-svc
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
       LaunchType: FARGATE
@@ -396,5 +396,5 @@ Resources:
 #      - CloudWatchEventRuleForCodePipeline
 #    Properties:
 #      ServiceToken: !Ref LambdaCodeBuildStartBuildArn
-#      Project: saas-octankhollywood-product-svc
+#      Project: saas-demo-product-svc
 ...

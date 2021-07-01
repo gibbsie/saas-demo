@@ -9,7 +9,7 @@ Resources:
   ApiGatewayLoggingRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: !Sub saas-octankhollywood-apigw-role-${AWS::Region}
+      RoleName: !Sub saas-demo-apigw-role-${AWS::Region}
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -25,7 +25,7 @@ Resources:
   ApiGatewayApi:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: saas-octankhollywood-api
+      Name: saas-demo-api
       EndpointConfiguration:
         Types: [REGIONAL]
   ApiGatewayLoggingAccount:
@@ -59,30 +59,6 @@ Resources:
       RestApiId: !Ref ApiGatewayApi
       ParentId: !Ref RegistrationManagerRegResource
       PathPart: health
-  ProductManagerProductsResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      RestApiId: !Ref ApiGatewayApi
-      ParentId: !GetAtt ApiGatewayApi.RootResourceId
-      PathPart: products
-  ProductManagerProductResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      RestApiId: !Ref ApiGatewayApi
-      ParentId: !GetAtt ApiGatewayApi.RootResourceId
-      PathPart: product
-  ProductManagerProductByIdResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      RestApiId: !Ref ApiGatewayApi
-      ParentId: !Ref ProductManagerProductResource
-      PathPart: '{id}'
-  ProductManagerHealthCheckResource:
-    Type: AWS::ApiGateway::Resource
-    Properties:
-      RestApiId: !Ref ApiGatewayApi
-      ParentId: !Ref ProductManagerProductResource
-      PathPart: health
   OrderManagerOrdersResource:
     Type: AWS::ApiGateway::Resource
     Properties:
@@ -106,6 +82,54 @@ Resources:
     Properties:
       RestApiId: !Ref ApiGatewayApi
       ParentId: !Ref OrderManagerOrderResource
+      PathPart: health
+  MediaManagerAllMediaResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !GetAtt ApiGatewayApi.RootResourceId
+      PathPart: medias
+  MediaManagerMediaResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !GetAtt ApiGatewayApi.RootResourceId
+      PathPart: media
+  MediaManagerMediaByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !Ref MediaManagerMediaResource
+      PathPart: '{id}'
+  MediaManagerHealthCheckResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !Ref MediaManagerMediaResource
+      PathPart: health
+  ProductManagerProductsResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !GetAtt ApiGatewayApi.RootResourceId
+      PathPart: products
+  ProductManagerProductResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !GetAtt ApiGatewayApi.RootResourceId
+      PathPart: product
+  ProductManagerProductByIdResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !Ref ProductManagerProductResource
+      PathPart: '{id}'
+  ProductManagerHealthCheckResource:
+    Type: AWS::ApiGateway::Resource
+    Properties:
+      RestApiId: !Ref ApiGatewayApi
+      ParentId: !Ref ProductManagerProductResource
       PathPart: health
   TenantManagerTenantsResource:
     Type: AWS::ApiGateway::Resource
@@ -1821,12 +1845,13 @@ Resources:
       - MediaManagerMediaResourceCORS
       - MediaManagerHealthCheckResourceCORS
       - MediaManagerMediaByIdResourceCORS
-      - MediaManagerMediaResourceCORS
+      - MediaManagerAllMediaResourceCORS
       - MediaManagerHealthCheckMethod
       - MediaManagerInsertMediaMethod
       - MediaManagerUpdateMediaMethod
       - MediaManagerGetMediaMethod
       - MediaManagerDeleteMediaMethod
+      - MediaManagerGetAllMediaMethod
       - TenantManagerTenantResourceCORS
       - TenantManagerHealthCheckResourceCORS
       - TenantManagerTenantByIdResourceCORS

@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Auth Service
 Parameters:
-  OctankHollywoodBucket:
+  BackendStackBucket:
     Description: The S3 bucket with octankhollywood resources
     Type: String
   ArtifactBucket:
@@ -51,7 +51,7 @@ Resources:
   ECSRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: saas-octankhollywood/auth-manager
+      RepositoryName: saas-demo/auth-manager
   InvokeClearEcrRepoImages:
     Type: Custom::CustomResource
     Properties:
@@ -60,15 +60,15 @@ Resources:
   CodeBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/aws/codebuild/saas-octankhollywood-auth-svc'
+      LogGroupName: '/aws/codebuild/saas-demo-auth-svc'
       RetentionInDays: 7
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: saas-octankhollywood-auth-svc
+      Name: saas-demo-auth-svc
       Tags:
         - Key: Name
-          Value: saas-octankhollywood-auth-svc
+          Value: saas-demo-auth-svc
       ServiceRole: !Ref CodeBuildRoleArn
       TimeoutInMinutes: 10
       Artifacts:
@@ -86,7 +86,7 @@ Resources:
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}
           - Name: SAAS_BACKEND_BUCKET
-            Value: !Ref OctankHollywoodBucket
+            Value: !Ref BackendStackBucket
       Source:
         Type: NO_SOURCE
         BuildSpec: |
@@ -100,8 +100,8 @@ Resources:
             build:
               commands:
                 - cd auth-manager
-                - docker image build -t saas-octankhollywood/auth-manager -f Dockerfile .
-                - docker tag saas-octankhollywood/auth-manager:latest ${REPOSITORY_URI}:latest
+                - docker image build -t saas-demo/auth-manager -f Dockerfile .
+                - docker tag saas-demo/auth-manager:latest ${REPOSITORY_URI}:latest
                 - cd ../
             post_build:
               commands:
@@ -115,7 +115,7 @@ Resources:
     DependsOn:
       - ECSService
     Properties:
-      Name: saas-octankhollywood-auth-svc
+      Name: saas-demo-auth-svc
       RoleArn: !Ref CodePipelineRoleArn
       ArtifactStore:
         Location: !Ref ArtifactBucket
@@ -145,7 +145,7 @@ Resources:
                 Version: 1
               RunOrder: 1
               Configuration:
-                FunctionName: !Sub saas-octankhollywood-update-ecs-${AWS::Region}
+                FunctionName: !Sub saas-demo-update-ecs-${AWS::Region}
                 UserParameters: !Sub '{"cluster":"${ECSCluster}","service":"${ECSService}","desiredCount":1}'
             - Name: DeployAction
               ActionTypeId:
@@ -156,7 +156,7 @@ Resources:
               RunOrder: 2
               Configuration:
                 ClusterName: !Ref ECSCluster
-                ServiceName: saas-octankhollywood-auth-svc
+                ServiceName: saas-demo-auth-svc
                 FileName: imagedefinitions.json
               InputArtifacts:
                 - Name: imgdef
@@ -184,12 +184,12 @@ Resources:
       Targets:
         - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
           RoleArn: !Ref CloudWatchEventRoleArn
-          Id: saas-octankhollywood-auth-svc
+          Id: saas-demo-auth-svc
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     DependsOn: ECSLogGroup
     Properties:
-      RoleName: saas-octankhollywood-auth-svc-exec-role
+      RoleName: saas-demo-auth-svc-exec-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -201,7 +201,7 @@ Resources:
             Action:
               - sts:AssumeRole
       Policies:
-        - PolicyName: saas-octankhollywood-auth-svc-exec-policy
+        - PolicyName: saas-demo-auth-svc-exec-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -228,12 +228,12 @@ Resources:
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/ecs/saas-octankhollywood-auth-svc'
+      LogGroupName: '/ecs/saas-demo-auth-svc'
       RetentionInDays: 7
   ECSTaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-octankhollywood-auth-svc-task-role
+      RoleName: saas-demo-auth-svc-task-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -250,7 +250,7 @@ Resources:
       - ECSTaskExecutionRole
       - ECSTaskRole
     Properties:
-      Family: saas-octankhollywood-auth-svc
+      Family: saas-demo-auth-svc
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       RequiresCompatibilities:
@@ -280,7 +280,7 @@ Resources:
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: saas-octankhollywood-auth-svc
+      Name: saas-demo-auth-svc
       HealthCheckProtocol: HTTP
       HealthCheckPath: '/auth/health'
       HealthCheckIntervalSeconds: 30
@@ -311,7 +311,7 @@ Resources:
       - ECSTaskDefinition
       - ALBRule
     Properties:
-      ServiceName: saas-octankhollywood-auth-svc
+      ServiceName: saas-demo-auth-svc
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
       LaunchType: FARGATE
@@ -335,5 +335,5 @@ Resources:
       - CloudWatchEventRuleForCodePipeline
     Properties:
       ServiceToken: !Ref LambdaCodeBuildStartBuildArn
-      Project: saas-octankhollywood-auth-svc
+      Project: saas-demo-auth-svc
 ...
