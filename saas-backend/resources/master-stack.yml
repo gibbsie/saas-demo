@@ -191,15 +191,14 @@ Resources:
         - source/web-client/app/404.html
         - source/web-client/app/config.json
         - source/web-client/app/favicon.ico
-        - source/web-client/app/images/Auctioneer2-300px.png
         - source/web-client/app/images/chart.png
         - source/web-client/app/images/favicon.ico
         - source/web-client/app/images/green-circle.png
-        - source/web-client/app/images/matt-icons_package-300px.png
-        - source/web-client/app/images/matt-icons_package-800px.png
         - source/web-client/app/images/monitor.png
+        - source/web-client/app/images/octank-group.png
+        - source/web-client/app/images/octankhollywood-300px.png
+        - source/web-client/app/images/octankhollywood-800px.png
         - source/web-client/app/images/red-circle.png
-        - source/web-client/app/images/yeoman.png
         - source/web-client/app/index.html
         - source/web-client/app/robots.txt
         - source/web-client/app/scripts/app.js
