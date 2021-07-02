@@ -5,7 +5,7 @@ Parameters:
   SourceBucket:
     Description: S3 bucket URL to copy objects from
     Type: String
-    Default: saas-demo-deployment-ap-southeast-2
+    Default: saas-octankhollywood-deployment-ap-southeast-2
 Resources:
   BackendStackBucket:
     Type: AWS::S3::Bucket
@@ -52,6 +52,8 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy'
       Policies:
         - PolicyName: !Sub saas-demo-s3-copy-policy-${AWS::Region}
           PolicyDocument:
@@ -107,6 +109,8 @@ Resources:
       Runtime: python3.7
       Timeout: 600
       MemorySize: 512
+      TracingConfig:
+        Mode: Active
       Handler: index.lambda_handler
       Code:
         ZipFile: |
@@ -266,6 +270,8 @@ Resources:
       Runtime: python3.7
       Timeout: 900
       MemorySize: 512
+      TracingConfig:
+        Mode: Active
       Handler: index.lambda_handler
       Code:
         ZipFile: |

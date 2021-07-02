@@ -48,6 +48,25 @@ Parameters:
     Description: Subnet for ECS service to place tasks in
     Type: String
 Resources:
+  ProductDynamoDBTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      AttributeDefinitions:
+      - AttributeName: tenant_id
+        AttributeType: S
+      - AttributeName: product_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: tenant_id
+        KeyType: HASH
+      - AttributeName: product_id
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      ContributorInsightsSpecification:
+        Enabled: true
+      TableName: ProductOctankHollywood
   ECSRepository:
     Type: AWS::ECR::Repository
     Properties:
@@ -224,7 +243,7 @@ Resources:
   CodePipelineMonitorQueueSsmParam:
     Type: AWS::SSM::Parameter
     Properties:
-      Name: !Sub saas-demo-ci-cd-queue-${AWS::Region}
+      Name: !Sub saas-demo-ci-cd-queue-product-${AWS::Region}
       Type: String
       Value: !Ref CodePipelineMonitorQueue
   ECSTaskExecutionRole:
@@ -363,7 +382,7 @@ Resources:
         - Field: path-pattern
           Values: ['/product*']
       ListenerArn: !Ref ALBListener
-      Priority: 6
+      Priority: 7
   ECSService:
     Type: AWS::ECS::Service
     DependsOn:

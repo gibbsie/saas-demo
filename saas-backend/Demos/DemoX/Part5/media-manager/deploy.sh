@@ -51,7 +51,7 @@ BUILD_ID=$(echo $BUILD_PROJECT | jq -r '.build.id')
 
 # Now, wait for CodePipeline to finish deploying everything to ECS
 echo
-echo "Rebuilding and deploying the Product Manager service. This can take a few minutes."
+echo "Rebuilding and deploying the Media Manager service. This can take a few minutes."
 echo "You can view the details of the CI/CD process in the AWS console for CodeBuild and CodePipeline."
 echo
 

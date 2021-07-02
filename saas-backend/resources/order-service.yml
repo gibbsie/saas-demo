@@ -64,6 +64,8 @@ Resources:
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
+      ContributorInsightsSpecification:
+        Enabled: true
       TableName: OrderOctankHollywood
   ECSRepository:
     Type: AWS::ECR::Repository
@@ -337,7 +339,7 @@ Resources:
         - Field: path-pattern
           Values: ['/order*']
       ListenerArn: !Ref ALBListener
-      Priority: 5
+      Priority: 6
   ECSService:
     Type: AWS::ECS::Service
     DependsOn:

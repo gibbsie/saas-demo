@@ -209,7 +209,7 @@ Resources:
   ECSCluster:
     Type: AWS::ECS::Cluster
     Properties:
-      ClusterName: saas-demo
+      ClusterName: saas-demo-octankhollywood
   ECSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     DependsOn: VPC
@@ -300,6 +300,8 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy'
       Policies:
         - PolicyName: !Sub saas-demo-cfn-codebuild-policy-${AWS::Region}
           PolicyDocument:
@@ -347,6 +349,8 @@ Resources:
       Runtime: python3.7
       Timeout: 60
       MemorySize: 512
+      TracingConfig:
+        Mode: Active
       Handler: index.lambda_handler
       Code:
         ZipFile: |
@@ -545,6 +549,8 @@ Resources:
       Runtime: python3.7
       Timeout: 300
       MemorySize: 512
+      TracingConfig:
+        Mode: Active
       Handler: index.lambda_handler
       Code:
         ZipFile: |
@@ -678,6 +684,8 @@ Resources:
       Runtime: python3.7
       Timeout: 300
       MemorySize: 512
+      TracingConfig:
+        Mode: Active
       Handler: index.lambda_handler
       Code:
         ZipFile: |

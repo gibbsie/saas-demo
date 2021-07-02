@@ -40,6 +40,9 @@ Resources:
           - ErrorCode: 403
             ResponseCode: 200
             ResponsePagePath: /index.html
+        ViewerCertificate:
+          CloudFrontDefaultCertificate: true
+          MinimumProtocolVersion: TLSv1.2_2019
         DefaultCacheBehavior:
           AllowedMethods:
             - DELETE
