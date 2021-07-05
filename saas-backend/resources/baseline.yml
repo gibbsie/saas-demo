@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Baseline
 Parameters:
-  BackendStackBucket:
+  CfnTemplateBucket:
     Description: S3 bucket where you uploaded the Lambda code packages for CloudFormation
     Type: String
   ArtifactBucket:
@@ -165,7 +165,8 @@ Resources:
       AutomaticStopTimeMinutes: 120
       SubnetId: !Ref SubnetPublicA
       InstanceType: t3.medium
-      Name: SaaS OctankHollywood IDE
+      Name: Octank Hollywood SaaS Demo IDE
+      Description: Octank Hollywood SaaS Demo IDE
       Repositories:
         - RepositoryUrl: https://github.com/gibbsie/saas-demo
           PathComponent: saas-demo
@@ -326,7 +327,7 @@ Resources:
                   - s3:ListBucketVersions
                   - s3:GetBucketVersioning
                 Resource:
-                  - !Sub arn:aws:s3:::${BackendStackBucket}
+                  - !Sub arn:aws:s3:::${CfnTemplateBucket}
               - Effect: Allow
                 Action:
                   - s3:GetObject
@@ -334,7 +335,7 @@ Resources:
                   - s3:DeleteObject
                   - s3:DeleteObjectVersion
                 Resource:
-                  - !Sub arn:aws:s3:::${BackendStackBucket}/*
+                  - !Sub arn:aws:s3:::${CfnTemplateBucket}/*
   LambdaCodeBuildStartBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -406,7 +407,7 @@ Resources:
                   - s3:ListBucket
                   - s3:GetBucketVersioning
                 Resource:
-                  - !Sub arn:aws:s3:::${BackendStackBucket}
+                  - !Sub arn:aws:s3:::${CfnTemplateBucket}
                   - !Sub arn:aws:s3:::${ArtifactBucket}
                   - !Sub arn:aws:s3:::${WebsiteBucket}
               - Effect: Allow
@@ -417,7 +418,7 @@ Resources:
                   - s3:GetObject
                   - s3:GetObjectVersion
                 Resource:
-                  - !Sub arn:aws:s3:::${BackendStackBucket}/*
+                  - !Sub arn:aws:s3:::${CfnTemplateBucket}/*
                   - !Sub arn:aws:s3:::${ArtifactBucket}/*
                   - !Sub arn:aws:s3:::${WebsiteBucket}/*
               - Effect: Allow
@@ -534,7 +535,10 @@ Resources:
                 Condition:
                   StringLike:
                     ecs:cluster:
-                      - !Sub arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/saas-demo
+                      - !Join
+                        - ''
+                        - - !Sub arn:aws:ecs:${AWS::Region}:${AWS::AccountId}:cluster/
+                          - !Ref ECSCluster
   CodePipelineUpdateEcsServiceLogs:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -735,16 +739,16 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ECSLoadBalancer
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/api-gateway.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/api-gateway.yml
       Parameters:
         ECSLoadBalancer: !GetAtt ECSLoadBalancer.DNSName
   UserService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/user-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/user-service.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -763,9 +767,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/auth-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/auth-service.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -784,9 +788,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/tenant-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/tenant-service.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -805,9 +809,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/registration-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/registration-service.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -826,9 +830,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/order-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/order-service.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -847,9 +851,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/product-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/product-service.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -868,9 +872,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/media-service.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/media-service.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
@@ -889,9 +893,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/web-client.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/web-client.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         WebsiteBucket: !Ref WebsiteBucket
         CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
         LambdaCodeBuildStartBuildArn: !GetAtt LambdaCodeBuildStartBuild.Arn

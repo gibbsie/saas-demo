@@ -20,10 +20,10 @@ print_dots () {
 }
 
 AWS_REGION=$(aws configure list | grep region | awk '{print $2}')
-CODEBUILD_PROJECT="saas-octankhollywood-product-svc"
-CODE_PIPELINE="saas-octankhollywood-product-svc"
-SAAS_BACKEND_BUCKET=$(aws ssm get-parameter --name "saas-octankhollywood-bucket-${AWS_REGION}" | jq -r '.Parameter.Value')
-DEPLOY_MONITOR_QUEUE=$(aws ssm get-parameter --name "saas-octankhollywood-ci-cd-queue-${AWS_REGION}" | jq -r '.Parameter.Value')
+CODEBUILD_PROJECT="saas-demo-product-svc"
+CODE_PIPELINE="saas-demo-product-svc"
+SAAS_BACKEND_BUCKET=$(aws ssm get-parameter --name "saas-demo-cfnbucket-${AWS_REGION}" | jq -r '.Parameter.Value')
+DEPLOY_MONITOR_QUEUE=$(aws ssm get-parameter --name "saas-demo-ci-cd-queue-product-${AWS_REGION}" | jq -r '.Parameter.Value')
 
 if [ -z "$SAAS_BACKEND_BUCKET" ]; then
     echo "Error: Can't determine SaaS OctankHollywood S3 bucket name"

@@ -2,8 +2,8 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Web Client
 Parameters:
-  BackendStackBucket:
-    Description: The S3 bucket with octankhollywood resources
+  CfnTemplateBucket:
+    Description: The S3 bucket with Octank Hollywood resources
     Type: String
   WebsiteBucket:
     Description: The S3 bucket to host the web client from
@@ -42,7 +42,7 @@ Resources:
             ResponsePagePath: /index.html
         ViewerCertificate:
           CloudFrontDefaultCertificate: true
-          MinimumProtocolVersion: TLSv1.2_2019
+          MinimumProtocolVersion: TLSv1.2_2021
         DefaultCacheBehavior:
           AllowedMethods:
             - DELETE
@@ -109,7 +109,7 @@ Resources:
         Type: LINUX_CONTAINER
         EnvironmentVariables:
           - Name: SAAS_BACKEND_BUCKET
-            Value: !Ref BackendStackBucket
+            Value: !Ref CfnTemplateBucket
           - Name: WEBSITE_BUCKET
             Value: !Ref WebsiteBucket
           - Name: SERVICE_URL
@@ -141,4 +141,11 @@ Resources:
     Properties:
       ServiceToken: !Ref LambdaCodeBuildStartBuildArn
       Project: saas-demo-web-client
+Outputs:
+  DistributionId:
+    Description: 'CloudFront Distribution ID'
+    Value: !Ref CloudFrontDistribution
+  Domain:
+    Description: 'Cloudfront Domain'
+    Value: !GetAtt CloudFrontDistribution.DomainName
 ...

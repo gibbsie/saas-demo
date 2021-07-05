@@ -2,7 +2,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Octank Hollywood SaaS Backend Tenant Registration Service
 Parameters:
-  BackendStackBucket:
+  CfnTemplateBucket:
     Description: The S3 bucket with Octank Hollywood resources
     Type: String
   ArtifactBucket:
@@ -86,7 +86,7 @@ Resources:
           - Name: REPOSITORY_URI
             Value: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}
           - Name: SAAS_BACKEND_BUCKET
-            Value: !Ref BackendStackBucket
+            Value: !Ref CfnTemplateBucket
       Source:
         Type: NO_SOURCE
         BuildSpec: |

@@ -5,16 +5,16 @@ Parameters:
   SourceBucket:
     Description: S3 bucket URL to copy objects from
     Type: String
-    Default: saas-octankhollywood-deployment-ap-southeast-2
+    Default: saas-demo-deployment-ap-southeast-2
 Resources:
-  BackendStackBucket:
+  CfnTemplateBucket:
     Type: AWS::S3::Bucket
-  BackendStackBucketSsmParam:
+  CfnTemplateBucketSsmParam:
     Type: AWS::SSM::Parameter
     Properties:
       Name: !Sub saas-demo-cfnbucket-${AWS::Region}
       Type: String
-      Value: !Ref BackendStackBucket
+      Value: !Ref CfnTemplateBucket
   WebsiteBucket:
     Type: AWS::S3::Bucket
     Properties:
@@ -39,7 +39,7 @@ Resources:
           Value: !Sub saas-demo-cloudtrail-bucket-${AWS::Region}
   S3ObjectsExecutionRole:
     Type: AWS::IAM::Role
-    DependsOn: BackendStackBucket
+    DependsOn: CfnTemplateBucket
     Properties:
       RoleName: !Sub saas-demo-s3-copy-role-${AWS::Region}
       Path: '/'
@@ -80,7 +80,7 @@ Resources:
                   - s3:ListBucketVersions
                   - s3:GetBucketVersioning
                 Resource:
-                  - !Sub arn:aws:s3:::${BackendStackBucket}
+                  - !Sub arn:aws:s3:::${CfnTemplateBucket}
                   - !Sub arn:aws:s3:::${ArtifactBucket}
                   - !Sub arn:aws:s3:::${CloudTrailBucket}
                   - !Sub arn:aws:s3:::${WebsiteBucket}
@@ -90,7 +90,7 @@ Resources:
                   - s3:DeleteObject
                   - s3:DeleteObjectVersion
                 Resource:
-                  - !Sub arn:aws:s3:::${BackendStackBucket}/*
+                  - !Sub arn:aws:s3:::${CfnTemplateBucket}/*
                   - !Sub arn:aws:s3:::${ArtifactBucket}/*
                   - !Sub arn:aws:s3:::${CloudTrailBucket}/*
                   - !Sub arn:aws:s3:::${WebsiteBucket}/*
@@ -147,11 +147,11 @@ Resources:
     DependsOn:
       - CopyS3Objects
       - CopyS3ObjectsLogs
-      - BackendStackBucket
+      - CfnTemplateBucket
     Properties:
       ServiceToken: !GetAtt CopyS3Objects.Arn
       Source: !Ref SourceBucket
-      Destination: !Ref BackendStackBucket
+      Destination: !Ref CfnTemplateBucket
       DestinationRegion: !Ref AWS::Region
       Objects:
         - resources/baseline.yml
@@ -176,22 +176,25 @@ Resources:
         - source/auth-manager/Dockerfile
         - source/auth-manager/server.js
         - source/auth-manager/package.json
-        - source/tenant-manager/Dockerfile
-        - source/tenant-manager/server.js
-        - source/tenant-manager/package.json
-        - source/user-manager/cognito-user.js
-        - source/user-manager/Dockerfile
-        - source/user-manager/server.js
-        - source/user-manager/package.json
-        - source/tenant-registration/Dockerfile
-        - source/tenant-registration/server.js
-        - source/tenant-registration/package.json
+        - source/media-manager/Dockerfile
+        - source/media-manager/server.js
+        - source/media-manager/package.json
         - source/order-manager/Dockerfile
         - source/order-manager/server.js
         - source/order-manager/package.json
         - source/product-manager/Dockerfile
         - source/product-manager/server.js
         - source/product-manager/package.json
+        - source/tenant-manager/Dockerfile
+        - source/tenant-manager/server.js
+        - source/tenant-manager/package.json
+        - source/tenant-registration/Dockerfile
+        - source/tenant-registration/server.js
+        - source/tenant-registration/package.json
+        - source/user-manager/cognito-user.js
+        - source/user-manager/Dockerfile
+        - source/user-manager/server.js
+        - source/user-manager/package.json
         - source/web-client/Gruntfile.js
         - source/web-client/app/404.html
         - source/web-client/app/config.json
@@ -348,10 +351,10 @@ Resources:
     DependsOn:
       - ClearS3BucketLogs
       - ClearS3Bucket
-      - BackendStackBucket
+      - CfnTemplateBucket
     Properties:
       ServiceToken: !GetAtt ClearS3Bucket.Arn
-      Bucket: !Ref BackendStackBucket
+      Bucket: !Ref CfnTemplateBucket
   InvokeLambdaClearArtifactBucket:
     Type: Custom::CustomResource
     DependsOn:
@@ -383,9 +386,9 @@ Resources:
     Type: AWS::CloudFormation::Stack
     DependsOn: InvokeLambdaCopyS3Objects
     Properties:
-      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${BackendStackBucket}/resources/baseline.yml
+      TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/baseline.yml
       Parameters:
-        BackendStackBucket: !Ref BackendStackBucket
+        CfnTemplateBucket: !Ref CfnTemplateBucket
         ArtifactBucket: !Ref ArtifactBucket
         CloudTrailBucket: !Ref CloudTrailBucket
         WebsiteBucket: !Ref WebsiteBucket
