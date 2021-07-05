@@ -94,7 +94,7 @@ module.exports.configure = function(environment) {
                 loglevel: dev.log.level,
                 url: {
                     auth: dev.protocol + dev.domain + ':' + port.auth + '/auth',
-                    media: dev.protocol + dev.domain + ':' + port.user + '/media',
+                    media: dev.protocol + dev.domain + ':' + port.media + '/media',
                     order: dev.protocol + dev.domain + ':' + port.order + '/order',
                     product: dev.protocol + dev.domain + ':' + port.product + '/product',
                     reg: dev.protocol + dev.domain + ':' + port.reg + '/reg',

@@ -11,23 +11,26 @@
         "tenant": 3003,
         "reg": 3004,
         "sys": 3011,
-        "product": 3006,
-        "order": 3005
+        "media": 3005,
+        "order": 3006,
+        "product": 3007
       },
         "role": {
           "sns":""
         },
       "name": {
         "auth": "Authentication Manager",
-        "user": "User Manager",
+        "media": "Media Manager",
+        "order": "Order Manager",
+        "product": "Product Manager",
+        "sys": "System Registration Manager",
         "tenant": "Tenant Manager",
         "reg": "Tenant Registration Manager",
-        "sys": "System Registration Manager",
-        "product": "Product Manager",
-        "order": "Order Manager"
+        "user": "User Manager"
       },
       "table": {
         "user": "User",
+        "media": "Media",
         "order": "Order",
         "product": "Product",
         "tenant": "Tenant"
@@ -52,23 +55,27 @@
         "user": 3001,
         "tenant": 3003,
         "reg": 3004,
-        "order": 3005,
-        "product": 3006
+        "sys": 3011,
+        "media": 3005,
+        "order": 3006,
+        "product": 3007
       },
       "name": {
         "auth": "Authentication Manager",
-        "user": "User Manager",
-        "tenant": "Tenant Manager",
+        "media": "Media Manager",
+        "order": "Order Manager",
+        "product": "Product Manager",
         "reg": "Tenant Registration Manager",
         "sys": "System Registration Manager",
-        "product": "Product Manager",
-        "order": "Order Manager"
+        "tenant": "Tenant Manager",
+        "user": "User Manager"
       },
       "table": {
-        "user": "UserOctankHollywood",
+        "media": "MediaOctankHollywood",
         "order": "OrderOctankHollywood",
         "product": "ProductOctankHollywood",
-        "tenant": "TenantOctankHollywood"
+        "tenant": "TenantOctankHollywood",
+        "user": "UserOctankHollywood"
       },
       "userRole": {
         "systemAdmin" : "SystemAdmin",
