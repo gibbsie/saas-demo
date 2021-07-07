@@ -1,5 +1,5 @@
 {
-  "Name": "product-manager",
+  "Name": "media-manager",
   "version": "1.0.0",
   "description": "Provide basic CRUD operations for media",
   "main": "server.js",

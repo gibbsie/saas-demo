@@ -37,6 +37,11 @@ Resources:
       Tags:
         - Key: Name
           Value: !Sub saas-demo-cloudtrail-bucket-${AWS::Region}
+  # CloudWatchAgentConfigSsm:
+  #   Type: AWS::SSM::Parameter
+  #   Properties:
+  #     Name: CW_CONFIG_CONTENT
+  #     valueFrom: ecs-cwagent
   S3ObjectsExecutionRole:
     Type: AWS::IAM::Role
     DependsOn: CfnTemplateBucket
@@ -111,6 +116,8 @@ Resources:
       MemorySize: 512
       TracingConfig:
         Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:14"
       Handler: index.lambda_handler
       Code:
         ZipFile: |
@@ -157,6 +164,7 @@ Resources:
         - resources/baseline.yml
         - resources/api-gateway.yml
         - resources/auth-service.yml
+        - resources/log-service.yml
         - resources/media-service.yml
         - resources/order-service.yml
         - resources/product-service.yml
@@ -179,6 +187,9 @@ Resources:
         - source/media-manager/Dockerfile
         - source/media-manager/server.js
         - source/media-manager/package.json
+        - source/log-service/Dockerfile
+        - source/log-service/fluent.conf
+        - source/log-service/plugins/.gitkeep
         - source/order-manager/Dockerfile
         - source/order-manager/server.js
         - source/order-manager/package.json
@@ -275,6 +286,8 @@ Resources:
       MemorySize: 512
       TracingConfig:
         Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:14"
       Handler: index.lambda_handler
       Code:
         ZipFile: |

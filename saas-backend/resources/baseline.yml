@@ -242,6 +242,10 @@ Resources:
           IpProtocol: tcp
           FromPort: 80
           ToPort: 80
+        - CidrIp: 0.0.0.0/0
+          IpProtocol: tcp
+          FromPort: 24224
+          ToPort: 24224
   ECSLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
@@ -352,6 +356,8 @@ Resources:
       MemorySize: 512
       TracingConfig:
         Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:14"
       Handler: index.lambda_handler
       Code:
         ZipFile: |
@@ -506,6 +512,8 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy'
       Policies:
         - PolicyName: saas-demo-update-ecs-policy
           PolicyDocument:
@@ -555,6 +563,8 @@ Resources:
       MemorySize: 512
       TracingConfig:
         Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:14"
       Handler: index.lambda_handler
       Code:
         ZipFile: |
@@ -647,6 +657,8 @@ Resources:
                 - lambda.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/CloudWatchLambdaInsightsExecutionRolePolicy'
       Policies:
         - PolicyName: saas-demo-clear-ecr-policy
           PolicyDocument:
@@ -690,6 +702,8 @@ Resources:
       MemorySize: 512
       TracingConfig:
         Mode: Active
+      Layers:
+        - !Sub "arn:aws:lambda:${AWS::Region}:580247275435:layer:LambdaInsightsExtension:14"
       Handler: index.lambda_handler
       Code:
         ZipFile: |
@@ -735,6 +749,19 @@ Resources:
                       raise
               else:
                   cfnresponse.send(event, context, cfnresponse.FAILED, {"Reason": "Unknown RequestType %s" % event['RequestType']})
+  XrayGroup:
+    Type: AWS::XRay::Group
+    Properties:
+      GroupName: saas-demo
+      FilterExpression: duration > 1
+      InsightsConfiguration:
+        InsightsEnabled: true
+        NotificationsEnabled: true
+      Tags:
+        - Key: "user:Application"
+          Value: "octankhollywood"
+        - Key: "user:Stack"
+          Value: "dev"
   ApiGateway:
     Type: AWS::CloudFormation::Stack
     DependsOn: ECSLoadBalancer
@@ -742,6 +769,27 @@ Resources:
       TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/api-gateway.yml
       Parameters:
         ECSLoadBalancer: !GetAtt ECSLoadBalancer.DNSName
+  # LogService:
+  #   Type: AWS::CloudFormation::Stack
+  #   DependsOn: ApiGateway
+  #   Properties:
+  #     TemplateURL: !Sub https://s3.${AWS::Region}.amazonaws.com/${CfnTemplateBucket}/resources/log-service.yml
+  #     Parameters:
+  #       CfnTemplateBucket: !Ref CfnTemplateBucket
+  #       ArtifactBucket: !Ref ArtifactBucket
+  #       CodeBuildRoleArn: !GetAtt CodeBuildRole.Arn
+  #       CodePipelineRoleArn: !GetAtt CodePipelineRole.Arn
+  #       CloudWatchEventRoleArn: !GetAtt CloudWatchEventRole.Arn
+  #       LambdaCodeBuildStartBuildArn: !GetAtt LambdaCodeBuildStartBuild.Arn
+  #       LambdaClearEcrImagesArn: !GetAtt ClearEcrImagesLambda.Arn
+  #       VPC: !Ref VPC
+  #       ALBListener: !Ref ALBListener
+  #       ECSCluster: !Ref ECSCluster
+  #       ServiceUrl: !GetAtt ApiGateway.Outputs.ApiGatewayEndpoint
+  #       ECSSecurityGroup: !Ref ECSSecurityGroup
+  #       ECSServiceRole: !Ref ECSServiceRole
+  #       SubnetPrivateA: !Ref SubnetPrivateA
+  #       SubnetPrivateB: !Ref SubnetPrivateB
   UserService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
@@ -763,6 +811,7 @@ Resources:
         ECSServiceRole: !Ref ECSServiceRole
         SubnetPrivateA: !Ref SubnetPrivateA
         SubnetPrivateB: !Ref SubnetPrivateB
+        XrayGroup: !Ref XrayGroup
   AuthService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
@@ -784,6 +833,7 @@ Resources:
         ECSServiceRole: !Ref ECSServiceRole
         SubnetPrivateA: !Ref SubnetPrivateA
         SubnetPrivateB: !Ref SubnetPrivateB
+        XrayGroup: !Ref XrayGroup
   TenantService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
@@ -805,6 +855,7 @@ Resources:
         ECSServiceRole: !Ref ECSServiceRole
         SubnetPrivateA: !Ref SubnetPrivateA
         SubnetPrivateB: !Ref SubnetPrivateB
+        XrayGroup: !Ref XrayGroup
   RegistrationService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
@@ -826,6 +877,7 @@ Resources:
         ECSServiceRole: !Ref ECSServiceRole
         SubnetPrivateA: !Ref SubnetPrivateA
         SubnetPrivateB: !Ref SubnetPrivateB
+        XrayGroup: !Ref XrayGroup
   OrderService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
@@ -847,6 +899,7 @@ Resources:
         ECSServiceRole: !Ref ECSServiceRole
         SubnetPrivateA: !Ref SubnetPrivateA
         SubnetPrivateB: !Ref SubnetPrivateB
+        XrayGroup: !Ref XrayGroup
   ProductService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
@@ -868,6 +921,7 @@ Resources:
         ECSServiceRole: !Ref ECSServiceRole
         SubnetPrivateA: !Ref SubnetPrivateA
         SubnetPrivateB: !Ref SubnetPrivateB
+        XrayGroup: !Ref XrayGroup
   MediaService:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway
@@ -889,6 +943,7 @@ Resources:
         ECSServiceRole: !Ref ECSServiceRole
         SubnetPrivateA: !Ref SubnetPrivateA
         SubnetPrivateB: !Ref SubnetPrivateB
+        XrayGroup: !Ref XrayGroup
   WebClient:
     Type: AWS::CloudFormation::Stack
     DependsOn: ApiGateway

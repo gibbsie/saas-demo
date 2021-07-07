@@ -221,11 +221,11 @@ angular.module('clientApp').run(function ($rootScope, $location, $http, Constant
   $rootScope.roleToDisplayName = function(userRole) {
     var displayName = '';
     if (userRole === 'TenantAdmin')
-      displayName = 'Administrator';
+      displayName = 'Tenant Administrator';
     else if (userRole === 'TenantUser')
-      displayName = 'Order Manager';
+      displayName = 'Media Manager';
     else if (userRole === 'SystemAdmin')
-      displayName = 'System Admin';
+      displayName = 'Octank Hollywood Administrator';
     else if (userRole === 'SystemUser')
       displayName = 'Customer Support';
 
@@ -248,7 +248,7 @@ angular.module('clientApp').run(function ($rootScope, $location, $http, Constant
       else if (viewLocation === '/users') {
         enabled = $rootScope.isAdminUser();
       }
-      else if ($.inArray(viewLocation, ['/products', '/orders']) >= 0) {
+      else if ($.inArray(viewLocation, ['/media', '/orders', '/products']) >= 0) {
         enabled = $rootScope.isTenantUser();
       }
     }

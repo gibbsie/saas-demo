@@ -1,6 +1,6 @@
 ---
 AWSTemplateFormatVersion: 2010-09-09
-Description: Octank Hollywood SaaS Backend Order Service
+Description: Octank Hollywood SaaS Backend Auth Service
 Parameters:
   CfnTemplateBucket:
     Description: The S3 bucket with octankhollywood resources
@@ -47,34 +47,11 @@ Parameters:
   SubnetPrivateB:
     Description: Subnet for ECS service to place tasks in
     Type: String
-  XrayGroup:
-    Description: AWS XRay Group
-    Type: String
 Resources:
-  OrderDynamoDBTable:
-    Type: AWS::DynamoDB::Table
-    Properties:
-      AttributeDefinitions:
-      - AttributeName: tenant_id
-        AttributeType: S
-      - AttributeName: order_id
-        AttributeType: S
-      KeySchema:
-      - AttributeName: tenant_id
-        KeyType: HASH
-      - AttributeName: order_id
-        KeyType: RANGE
-      # BillingMode: PAY_PER_REQUEST
-      ProvisionedThroughput:
-        ReadCapacityUnits: 5
-        WriteCapacityUnits: 5
-      ContributorInsightsSpecification:
-        Enabled: true
-      TableName: OrderOctankHollywood
   ECSRepository:
     Type: AWS::ECR::Repository
     Properties:
-      RepositoryName: saas-demo/order-manager
+      RepositoryName: saas-demo/log-service
   InvokeClearEcrRepoImages:
     Type: Custom::CustomResource
     Properties:
@@ -83,22 +60,22 @@ Resources:
   CodeBuildLogs:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/aws/codebuild/saas-demo-order-svc'
+      LogGroupName: '/aws/codebuild/saas-demo-log-svc'
       RetentionInDays: 7
   CodeBuildProject:
     Type: AWS::CodeBuild::Project
     Properties:
-      Name: saas-demo-order-svc
+      Name: saas-demo-log-svc
       Tags:
         - Key: Name
-          Value: saas-demo-order-svc
+          Value: saas-demo-log-svc
       ServiceRole: !Ref CodeBuildRoleArn
       TimeoutInMinutes: 10
       Artifacts:
         Type: S3
         Location: !Ref ArtifactBucket
         Path: '/'
-        Name: order-manager
+        Name: log-service
         Packaging: ZIP
       Environment:
         ComputeType: BUILD_GENERAL1_SMALL
@@ -117,27 +94,28 @@ Resources:
           phases:
             pre_build:
               commands:
-                - aws s3 cp --recursive s3://$SAAS_BACKEND_BUCKET/source/order-manager ./order-manager
-                - aws s3 cp --recursive s3://$SAAS_BACKEND_BUCKET/source/shared-modules ./order-manager/shared-modules
+                - aws s3 cp --recursive s3://$SAAS_BACKEND_BUCKET/source/log-service ./log-service
+                - aws s3 cp --recursive s3://$SAAS_BACKEND_BUCKET/source/shared-modules ./log-service/shared-modules
                 - $(aws ecr get-login --no-include-email)
             build:
               commands:
-                - cd order-manager
-                - docker image build -t saas-demo/order-manager -f Dockerfile .
-                - docker tag saas-demo/order-manager:latest ${REPOSITORY_URI}:latest
+                - cd log-service
+                - docker image build -t saas-demo/log-service -f Dockerfile .
+                - docker tag saas-demo/log-service:latest ${REPOSITORY_URI}:latest
                 - cd ../
             post_build:
               commands:
                 - docker push "${REPOSITORY_URI}:latest"
-                - printf '[{"name":"order-manager","imageUri":"%s"}]' "${REPOSITORY_URI}:latest" > imagedefinitions.json
+                - printf '[{"name":"log-service","imageUri":"%s"}]' "${REPOSITORY_URI}:latest" > imagedefinitions.json
           artifacts:
             files: imagedefinitions.json
             discard-paths: yes
   CodePipeline:
     Type: AWS::CodePipeline::Pipeline
-    DependsOn: ECSService
+    DependsOn:
+      - ECSService
     Properties:
-      Name: saas-demo-order-svc
+      Name: saas-demo-log-svc
       RoleArn: !Ref CodePipelineRoleArn
       ArtifactStore:
         Location: !Ref ArtifactBucket
@@ -153,7 +131,7 @@ Resources:
                 Version: 1
               Configuration:
                 S3Bucket: !Ref ArtifactBucket
-                S3ObjectKey: order-manager
+                S3ObjectKey: log-service
                 PollForSourceChanges: false
               OutputArtifacts:
                 - Name: imgdef
@@ -178,7 +156,7 @@ Resources:
               RunOrder: 2
               Configuration:
                 ClusterName: !Ref ECSCluster
-                ServiceName: saas-demo-order-svc
+                ServiceName: saas-demo-log-svc
                 FileName: imagedefinitions.json
               InputArtifacts:
                 - Name: imgdef
@@ -202,16 +180,16 @@ Resources:
             bucketName:
               - !Ref ArtifactBucket
             key:
-              - order-manager
+              - log-service
       Targets:
         - Arn: !Sub arn:aws:codepipeline:${AWS::Region}:${AWS::AccountId}:${CodePipeline}
           RoleArn: !Ref CloudWatchEventRoleArn
-          Id: saas-demo-order-svc
+          Id: saas-demo-log-svc
   ECSTaskExecutionRole:
     Type: AWS::IAM::Role
     DependsOn: ECSLogGroup
     Properties:
-      RoleName: saas-demo-order-svc-exec-role
+      RoleName: saas-demo-log-svc-exec-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -225,7 +203,7 @@ Resources:
       ManagedPolicyArns:
         - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
-        - PolicyName: saas-demo-order-svc-exec-policy
+        - PolicyName: saas-demo-log-svc-exec-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
@@ -249,20 +227,15 @@ Resources:
                   - logs:CreateLogStream
                   - logs:DescribeLogStreams
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
-              - Effect: Allow
-                Action:
-                  - xray:PutTraceSegments
-                  - xray:PutTelemetryRecords
-                Resource: !Sub arn:aws:xray:${AWS::Region}:${AWS::AccountId}:group/saas-demo/*
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
-      LogGroupName: '/ecs/saas-demo-order-svc'
+      LogGroupName: '/ecs/saas-demo-log-svc'
       RetentionInDays: 7
   ECSTaskRole:
     Type: AWS::IAM::Role
     Properties:
-      RoleName: saas-demo-order-svc-task-role
+      RoleName: saas-demo-log-svc-task-role
       Path: '/'
       AssumeRolePolicyDocument:
         Version: 2012-10-17
@@ -273,55 +246,49 @@ Resources:
                 - ecs-tasks.amazonaws.com
             Action:
               - sts:AssumeRole
-      ManagedPolicyArns:
-        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
-        - PolicyName: saas-demo-order-svc-task-policy
+        - PolicyName: saas-demo-log-svc-task-policy
           PolicyDocument:
             Version: 2012-10-17
             Statement:
               - Effect: Allow
                 Action:
-                  - dynamodb:GetItem
-                  - dynamodb:Scan
-                  - dynamodb:Query
-                  - dynamodb:PutItem
-                  - dynamodb:UpdateItem
-                  - dynamodb:DeleteItem
-                  - dynamodb:BatchGetItem
-                  - dynamodb:DescribeTable
-                  - dynamodb:CreateTable
-                Resource: !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/OrderOctankHollywood
-              - Effect: Allow
-                Action:
-                  - xray:PutTraceSegments
-                  - xray:PutTelemetryRecords
-                Resource: !Sub arn:aws:xray:${AWS::Region}:${AWS::AccountId}:group/saas-demo/*
+                  - firehose:PutRecord
+                  - firehose:PutRecordBatch
+                Resource: !Sub arn:aws:kinesis:${AWS::Region}:${AWS::AccountId}:stream/*
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     DependsOn:
       - ECSTaskExecutionRole
       - ECSTaskRole
     Properties:
-      Family: saas-demo-order-svc
+      Family: saas-demo-log-svc
       ExecutionRoleArn: !GetAtt ECSTaskExecutionRole.Arn
       TaskRoleArn: !GetAtt ECSTaskRole.Arn
       RequiresCompatibilities:
         - FARGATE
-      Memory: 1024
-      Cpu: 512
+      Memory: 8192
+      Cpu: 4096
       NetworkMode: awsvpc
       ContainerDefinitions:
-        - Name: order-manager
+        - Name: log-service
+          Essential: true
           Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}:latest
           PortMappings:
-            - ContainerPort: 3005
+            - ContainerPort: 24224
+              HostPort: 24224
+              Protocol: tcp
           LogConfiguration:
             LogDriver: awslogs
             Options:
               awslogs-group: !Ref ECSLogGroup
               awslogs-region: !Ref AWS::Region
               awslogs-stream-prefix: ecs
+          HealthCheck:
+                      Command:
+                        - CMD-SHELL
+                        - curl http://localhost:8888/healthcheck?json=%7B%22log%22%3A+%22health+check%22%7D || exit 1
+                      StartPeriod: 30
           Environment:
             - Name: AWS_REGION
               Value: !Ref AWS::Region
@@ -330,78 +297,36 @@ Resources:
               Value: !Ref AWS::AccountId
             - Name: SERVICE_URL
               Value: !Ref ServiceUrl
-        - Name: xray-daemon
-          Image: public.ecr.aws/xray/aws-xray-daemon:latest
-          LogConfiguration:
-            LogDriver: awslogs
-            Options:
-              awslogs-create-group: True
-              awslogs-group: !Ref ECSLogGroup
-              awslogs-region: !Ref AWS::Region
-              awslogs-stream-prefix: ecs
-          Environment:
-            - Name: AWS_REGION
-              Value: !Ref AWS::Region
-              # Shared config module sets the account id that the User Manager needs when creating IAM polices
-            - Name: AWS_ACCOUNT_ID
-              Value: !Ref AWS::AccountId
-        # - Name: cloudwatch-agent
-        #   Image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
-        #   Secrets:
-        #     - Name: CW_CONFIG_CONTENT
-        #       ValueFrom: ecs-cwagent
-        #   LogConfiguration:
-        #     LogDriver: awslogs
-        #     Options:
-        #       awslogs-create-group: True
-        #       awslogs-group: !Ref ECSLogGroup
-        #       awslogs-region: !Ref AWS::Region
-        #       awslogs-stream-prefix: ecs
-        #   Environment:
-        #     - Name: AWS_REGION
-        #       Value: !Ref AWS::Region
-        #       # Shared config module sets the account id that the User Manager needs when creating IAM polices
-        #     - Name: AWS_ACCOUNT_ID
-        #       Value: !Ref AWS::AccountId
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      Name: saas-demo-order-svc
-      HealthCheckProtocol: HTTP
-      HealthCheckPath: '/order/health'
-      HealthCheckIntervalSeconds: 30
-      HealthCheckTimeoutSeconds: 5
-      HealthyThresholdCount: 2
-      UnhealthyThresholdCount: 2
-      TargetGroupAttributes:
-        - Key: deregistration_delay.timeout_seconds
-          Value: 10
-      Port: 80
-      Protocol: HTTP
+      Name: saas-demo-log-svc
+      Port: 24224
+      Protocol: TCP
       TargetType: ip
       VpcId: !Ref VPC
-  ALBRule:
-    Type: AWS::ElasticLoadBalancingV2::ListenerRule
-    Properties:
-      Actions:
-        - TargetGroupArn: !Ref ALBTargetGroup
-          Type: forward
-      Conditions:
-        - Field: path-pattern
-          Values: ['/order*']
-      ListenerArn: !Ref ALBListener
-      Priority: 6
+  # ALBRule:
+  #   Type: AWS::ElasticLoadBalancingV2::ListenerRule
+  #   Properties:
+  #     Actions:
+  #       - TargetGroupArn: !Ref ALBTargetGroup
+  #         Type: forward
+  #     Conditions:
+  #       - Field: path-pattern
+  #         Values: ['/log*']
+  #     ListenerArn: !Ref ALBListener
+  #     Priority: 2
   ECSService:
     Type: AWS::ECS::Service
     DependsOn:
       - ECSTaskDefinition
-      - ALBRule
+      # - ALBRule
     Properties:
-      ServiceName: saas-demo-order-svc
+      ServiceName: saas-demo-log-svc
       Cluster: !Ref ECSCluster
       TaskDefinition: !Ref ECSTaskDefinition
       LaunchType: FARGATE
-      DesiredCount: 0
+      DesiredCount: 2
       NetworkConfiguration:
         AwsvpcConfiguration:
           SecurityGroups:
@@ -410,9 +335,12 @@ Resources:
             - !Ref SubnetPrivateA
             - !Ref SubnetPrivateB
       LoadBalancers:
-        - ContainerName: order-manager
-          ContainerPort: 3005
+        - ContainerName: log-service
+          ContainerPort: 24224
           TargetGroupArn: !Ref ALBTargetGroup
+      DeploymentConfiguration:
+        MaximumPercent: 200
+        MinimumHealthyPercent: 100
   InvokeLambdaCodeBuildStartBuild:
     Type: Custom::CustomResource
     DependsOn:
@@ -421,5 +349,5 @@ Resources:
       - CloudWatchEventRuleForCodePipeline
     Properties:
       ServiceToken: !Ref LambdaCodeBuildStartBuildArn
-      Project: saas-demo-order-svc
+      Project: saas-demo-log-svc
 ...

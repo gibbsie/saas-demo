@@ -1891,6 +1891,13 @@ Resources:
       RestApiId: !Ref ApiGatewayApi
       StageName: v1
       DeploymentId: !Ref ApiGatewayApiDeployment
+      TracingEnabled: true
+      MethodSettings:
+        - HttpMethod: "*"
+          LoggingLevel: INFO
+          MetricsEnabled: true
+          DataTraceEnabled: true
+          ResourcePath: "/*"
 Outputs:
   ApiGatewayEndpoint:
     Description: API Gateway Invoke URL

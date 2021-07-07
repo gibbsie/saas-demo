@@ -47,6 +47,9 @@ Parameters:
   SubnetPrivateB:
     Description: Subnet for ECS service to place tasks in
     Type: String
+  XrayGroup:
+    Description: AWS XRay Group
+    Type: String
 Resources:
   UserDynamoDBTable:
     Type: AWS::DynamoDB::Table
@@ -61,6 +64,7 @@ Resources:
         KeyType: HASH
       - AttributeName: user_id
         KeyType: RANGE
+      # BillingMode: PAY_PER_REQUEST
       ProvisionedThroughput:
         ReadCapacityUnits: 5
         WriteCapacityUnits: 5
@@ -228,6 +232,8 @@ Resources:
                 - ecs-tasks.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
         - PolicyName: saas-demo-user-svc-exec-policy
           PolicyDocument:
@@ -253,6 +259,11 @@ Resources:
                   - logs:CreateLogStream
                   - logs:DescribeLogStreams
                 Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:*
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: !Sub arn:aws:xray:${AWS::Region}:${AWS::AccountId}:group/saas-demo/*
   ECSLogGroup:
     Type: AWS::Logs::LogGroup
     Properties:
@@ -272,6 +283,8 @@ Resources:
                 - ecs-tasks.amazonaws.com
             Action:
               - sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess
       Policies:
         - PolicyName: saas-demo-user-svc-task-policy
           PolicyDocument:
@@ -318,6 +331,11 @@ Resources:
                   - iam:AttachRolePolicy
                   - iam:PassRole
                 Resource: !Sub arn:aws:iam::${AWS::AccountId}:role/*
+              - Effect: Allow
+                Action:
+                  - xray:PutTraceSegments
+                  - xray:PutTelemetryRecords
+                Resource: !Sub arn:aws:xray:${AWS::Region}:${AWS::AccountId}:group/saas-demo/*
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     DependsOn:
@@ -351,6 +369,39 @@ Resources:
               Value: !Ref AWS::AccountId
             - Name: SERVICE_URL
               Value: !Ref ServiceUrl
+        - Name: xray-daemon
+          Image: public.ecr.aws/xray/aws-xray-daemon:latest
+          LogConfiguration:
+            LogDriver: awslogs
+            Options:
+              awslogs-create-group: True
+              awslogs-group: !Ref ECSLogGroup
+              awslogs-region: !Ref AWS::Region
+              awslogs-stream-prefix: ecs
+          Environment:
+            - Name: AWS_REGION
+              Value: !Ref AWS::Region
+              # Shared config module sets the account id that the User Manager needs when creating IAM polices
+            - Name: AWS_ACCOUNT_ID
+              Value: !Ref AWS::AccountId
+        # - Name: cloudwatch-agent
+        #   Image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
+        #   Secrets:
+        #     - Name: CW_CONFIG_CONTENT
+        #       ValueFrom: ecs-cwagent
+        #   LogConfiguration:
+        #     LogDriver: awslogs
+        #     Options:
+        #       awslogs-create-group: True
+        #       awslogs-group: !Ref ECSLogGroup
+        #       awslogs-region: !Ref AWS::Region
+        #       awslogs-stream-prefix: ecs
+        #   Environment:
+        #     - Name: AWS_REGION
+        #       Value: !Ref AWS::Region
+        #       # Shared config module sets the account id that the User Manager needs when creating IAM polices
+        #     - Name: AWS_ACCOUNT_ID
+        #       Value: !Ref AWS::AccountId
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
