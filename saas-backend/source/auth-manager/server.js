@@ -44,7 +44,7 @@ app.use(AWSXRay.express.openSegment('auth-manager'));
 //AWSXRay.middleware.enableDynamicNaming('*.example.com');
 
 app.get('/auth/health', function(req, res) {
-    res.status(200).send({service: 'Authentication Manager', isAlive: true});
+    res.status(200).send({service: 'Authentication Manager', isAlive: 'true'});
 });
 
 // process login request

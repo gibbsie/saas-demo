@@ -1,5 +1,5 @@
 <div class="jumbotron">
-  <div class="well" style="padding-top: 0px;" ng-if="isSystemUser()">
+  <div class="well" style="padding-top: 0px;">
     <div>
       <img style="width:28px; float: left; margin-right: 5px;" src="/images/monitor.png">
       <h3 class="text-left">Service Health</h3>
@@ -22,16 +22,20 @@
     <br/>
     <div class="row">
       <div class="col-sm-4">
-        <img class="health-image" ng-src="{{userManagerHealthy && '/images/green-circle.png' || '/images/red-circle.png'}}">
-        <h5 class="text-left">User Manager</h5>
+        <img class="health-image" ng-src="{{mediaManagerHealthy && '/images/green-circle.png' || '/images/red-circle.png'}}">
+        <h5 class="text-left">Media Manager</h5>
       </div>
       <div class="col-sm-4">
         <img class="health-image" ng-src="{{orderManagerHealthy && '/images/green-circle.png' || '/images/red-circle.png'}}">
         <h5 class="text-left">Order Manager</h5>
       </div>
       <div class="col-sm-4">
-        <img class="health-image" ng-src="{{mediaManagerHealthy && '/images/green-circle.png' || '/images/red-circle.png'}}">
-        <h5 class="text-left">Media Manager</h5>
+        <img class="health-image" ng-src="{{productManagerHealthy && '/images/green-circle.png' || '/images/red-circle.png'}}">
+        <h5 class="text-left">Product Manager</h5>
+      </div>
+      <div class="col-sm-4">
+        <img class="health-image" ng-src="{{userManagerHealthy && '/images/green-circle.png' || '/images/red-circle.png'}}">
+        <h5 class="text-left">User Manager</h5>
       </div>
     </div>
   </div>
@@ -85,7 +89,7 @@
         </div>
       </div>
     </div>
-    <div ng-if="isSystemUser()" class="row">
+    <div class="row" ng-if="isSystemUser()">
       <div class="col-sm-6">
         <div class="panel panel-default">
           <div class="panel-heading panel-heading-custom">

@@ -266,6 +266,10 @@ Resources:
                   - xray:PutTraceSegments
                   - xray:PutTelemetryRecords
                 Resource: !Sub arn:aws:xray:${AWS::Region}:${AWS::AccountId}:group/saas-demo/*
+              # - Effect: allow
+              #   Action:
+              #     - sdkmetrics:*
+              #   Resource: *
   ECSTaskDefinition:
     Type: AWS::ECS::TaskDefinition
     DependsOn:
@@ -314,6 +318,7 @@ Resources:
               # Shared config module sets the account id that the User Manager needs when creating IAM polices
             - Name: AWS_ACCOUNT_ID
               Value: !Ref AWS::AccountId
+        # https://github.com/aws-samples/amazon-cloudwatch-container-insights/tree/master/ecs-task-definition-templates/deployment-mode/sidecar/cwagent-sdkmetrics
         # - Name: cloudwatch-agent
         #   Image: public.ecr.aws/cloudwatch-agent/cloudwatch-agent:latest
         #   Secrets:
@@ -327,11 +332,13 @@ Resources:
         #       awslogs-region: !Ref AWS::Region
         #       awslogs-stream-prefix: ecs
         #   Environment:
-        #     - Name: AWS_REGION
-        #       Value: !Ref AWS::Region
-        #       # Shared config module sets the account id that the User Manager needs when creating IAM polices
-        #     - Name: AWS_ACCOUNT_ID
-        #       Value: !Ref AWS::AccountId
+        #     # Needed to enable AWS SDK Metrics
+        #     - Name: AWS_CSM_ENABLED
+        #       Value: true
+        #     - Name: AWS_CSM_PORT
+        #       Value: 31000
+        #     - Name: AWS_CSM_HOST
+        #       Value: 127.0.0.1
   ALBTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:

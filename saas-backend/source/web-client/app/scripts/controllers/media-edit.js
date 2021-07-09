@@ -27,13 +27,12 @@ angular.module('clientApp').controller('MediaEditCtrl', function ($scope, $locat
 
   $scope.saveMedia = function() {
     var media = {
-      media_id: $scope.media.media_id,
-      sku: $scope.media.sku,
+      id: $scope.media.id,
       title: $scope.media.title,
       description: $scope.media.description,
-      condition: $scope.media.condition,
-      conditionDescription: $scope.media.conditionDescription,
-      numberInStock: $scope.media.numberInStock,
+      genre: $scope.media.genre,
+      cast: $scope.media.cast,
+      rating: $scope.media.rating,
       unitCost: $scope.media.unitCost
     };
 

@@ -12,24 +12,24 @@ angular.module('clientApp').controller('MediaAddCtrl', function ($scope, $locati
 
     $scope.saveMedia = function() {
       var media = {
-        sku: $scope.media.sku,
+        id: $scope.media.id,
         title: $scope.media.title,
         description: $scope.media.description,
-        condition: $scope.media.condition,
-        conditionDescription: $scope.media.conditionDescription,
-        numberInStock: $scope.media.numberInStock,
+        genre: $scope.media.genre,
+        cast: $scope.media.cast,
+        rating: $scope.media.rating,
         unitCost: $scope.media.unitCost
       };
 
       $http.post(Constants.MEDIA_MANAGER_URL + '/media', media)
         .then(function(response) {
           console.log('Media added');
-          $scope.media.sku = '';
+          $scope.media.id = '';
           $scope.media.title = '';
           $scope.media.description = '';
-          $scope.media.condition = '1';
-          $scope.media.conditionDescription = '';
-          $scope.media.numberInStock = 0;
+          $scope.media.genre = '1';
+          $scope.media.cast = '';
+          $scope.media.rating = 0;
           $scope.media.unitCost = 0;
           $route.reload();
         })

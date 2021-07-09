@@ -242,7 +242,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   AuthManagerHealthCheckResourceCORS:
@@ -272,7 +272,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   AuthManagerAuthMethod:
@@ -336,7 +336,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   RegistrationManagerHealthCheckResourceCORS:
@@ -366,7 +366,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   RegistrationManagerRegMethod:
@@ -430,7 +430,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   OrderManagerHealthCheckResourceCORS:
@@ -460,7 +460,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   OrderManagerOrderByIdResourceCORS:
@@ -490,7 +490,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   OrderManagerOrdersResourceCORS:
@@ -520,7 +520,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   OrderManagerHealthCheckMethod:
@@ -646,7 +646,7 @@ Resources:
             ResponseTemplates: {application/json: ''}
             ResponseParameters:
               method.response.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
-              method.response.header.Access-Control-Allow-Methods: "'POST,PUT,OPTIONS'"
+              method.response.header.Access-Control-Allow-Methods: "'OPTIONS,POST,PUT'"
               method.response.header.Access-Control-Allow-Origin: "'*'"
               method.response.header.Access-Control-Max-Age: "'3600'"
               method.response.header.X-Requested-With: "'*'"
@@ -658,7 +658,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   ProductManagerHealthCheckResourceCORS:
@@ -688,7 +688,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   ProductManagerProductByIdResourceCORS:
@@ -718,7 +718,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   ProductManagerProductsResourceCORS:
@@ -748,7 +748,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   ProductManagerHealthCheckMethod:
@@ -886,7 +886,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   MediaManagerHealthCheckResourceCORS:
@@ -916,7 +916,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   MediaManagerMediaByIdResourceCORS:
@@ -946,7 +946,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   MediaManagerAllMediaResourceCORS:
@@ -976,7 +976,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   MediaManagerHealthCheckMethod:
@@ -1114,7 +1114,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   TenantManagerHealthCheckResourceCORS:
@@ -1144,7 +1144,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   TenantManagerTenantByIdResourceCORS:
@@ -1174,7 +1174,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   TenantManagerTenantsResourceCORS:
@@ -1204,7 +1204,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   TenantManagerHealthCheckMethod:
@@ -1342,7 +1342,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   UserManagerUserResourceCORS:
@@ -1372,7 +1372,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   UserManagerUserByIdResourceCORS:
@@ -1402,7 +1402,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   UserManagerHealthCheckResourceCORS:
@@ -1432,7 +1432,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   UserManagerDisableResourceCORS:
@@ -1462,7 +1462,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   UserManagerEnableResourceCORS:
@@ -1492,7 +1492,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   UserManagerCreateResourceCORS:
@@ -1522,7 +1522,7 @@ Resources:
           ResponseParameters:
             method.response.header.Access-Control-Allow-Headers: false
             method.response.header.Access-Control-Allow-Methods: false
-            method.response.header.Access-Control-Allow-Origin: false
+            method.response.header.Access-Control-Allow-Origin: true
             method.response.header.Access-Control-Max-Age: false
             method.response.header.X-Requested-With: false
   UserManagerRegResourceCORS:

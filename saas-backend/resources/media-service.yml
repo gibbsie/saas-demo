@@ -358,7 +358,7 @@ Resources:
         - Name: media-manager
           Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}:latest
           PortMappings:
-            - ContainerPort: 3006
+            - ContainerPort: 3005
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -454,7 +454,7 @@ Resources:
             - !Ref SubnetPrivateB
       LoadBalancers:
         - ContainerName: media-manager
-          ContainerPort: 3006
+          ContainerPort: 3005
           TargetGroupArn: !Ref ALBTargetGroup
 # Don't deploy the media service or make the media service DynamoDB table
 # now. Let the attendee do it as part of Lab2.

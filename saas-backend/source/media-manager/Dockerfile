@@ -14,4 +14,4 @@ ENV NODE_CONFIG_DIR=/usr/src/app/shared-modules/config-helper/config/
 
 CMD ["node", "./media-manager/server.js"]
 
-EXPOSE 3006
+EXPOSE 3005

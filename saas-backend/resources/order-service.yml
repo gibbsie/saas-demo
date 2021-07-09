@@ -315,7 +315,7 @@ Resources:
         - Name: order-manager
           Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}:latest
           PortMappings:
-            - ContainerPort: 3005
+            - ContainerPort: 3006
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -411,7 +411,7 @@ Resources:
             - !Ref SubnetPrivateB
       LoadBalancers:
         - ContainerName: order-manager
-          ContainerPort: 3005
+          ContainerPort: 3006
           TargetGroupArn: !Ref ALBTargetGroup
   InvokeLambdaCodeBuildStartBuild:
     Type: Custom::CustomResource

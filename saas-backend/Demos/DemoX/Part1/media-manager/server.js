@@ -40,11 +40,11 @@ var mediaSchema = {
 	TableName: configuration.table.media,
 	KeySchema: [
 		{AttributeName: "tenant_id", KeyType: "HASH"}, //Partition key
-		{AttributeName: "media_id", KeyType: "RANGE"}  //Sort key
+		{AttributeName: "id", KeyType: "RANGE"}  //Sort key
 	],
 	AttributeDefinitions: [
 		{AttributeName: "tenant_id", AttributeType: "S"},
-		{AttributeName: "media_id", AttributeType: "S"}
+		{AttributeName: "id", AttributeType: "S"}
 	],
 	ProvisionedThroughput: {
 		ReadCapacityUnits: 5,
@@ -59,7 +59,7 @@ app.use(AWSXRay.express.openSegment('auth-manager'));
 //AWSXRay.middleware.enableDynamicNaming('*.example.com');
 
 app.get('/media/health', function(req, res) {
-	res.status(200).send({service: 'Media Manager', isAlive: true});
+	res.status(200).send({service: 'Media Manager', isAlive: 'true'});
 });
 
 // Create REST entry points
@@ -68,7 +68,7 @@ app.get('/media/:id', function(req, res) {
 	// init params structure with request params
 	var params = {
 		tenant_id: tenantId,
-		media_id: req.params.id
+		id: req.params.id
 	};
 	tokenManager.getSystemCredentials(function(credentials) {
 		// construct the helper object
@@ -112,7 +112,7 @@ app.get('/media', function(req, res) {
 app.post('/media', function(req, res) {
 	var media = req.body;
 	var guid = uuidv4();
-	media.media_id = guid;
+	media.id = guid;
 	media.tenant_id = tenantId;
 	winston.debug(JSON.stringify(media));
 	// construct the helper object
@@ -131,33 +131,33 @@ app.post('/media', function(req, res) {
 });
 
 app.put('/media', function(req, res) {
-	winston.debug('Updating media: ' + req.body.media_id);
+	winston.debug('Updating media: ' + req.body.id);
 	// init the params from the request data
 	var keyParams = {
 		tenant_id: tenantId,
-		media_id: req.body.media_id
+		id: req.body.id
 	};
 	var mediaUpdateParams = {
 		TableName: mediaSchema.TableName,
 		Key: keyParams,
 		UpdateExpression: "set " +
-				"sku = :sku, " +
+				"id = :id, " +
 				"title = :title, " +
 				"description = :description, " +
-				"#condition = :condition, " +
-				"conditionDescription = :conditionDescription, " +
-				"numberInStock = :numberInStock, " +
+				"#genre = :genre, " +
+				"cast = :cast, " +
+				"rating = :rating, " +
 				"unitCost = :unitCost",
 		ExpressionAttributeNames: {
-			'#condition': 'condition'
+			'#genre': 'genre'
 		},
 		ExpressionAttributeValues: {
-			":sku": req.body.sku,
+			":id": req.body.id,
 			":title": req.body.title,
 			":description": req.body.description,
-			":condition": req.body.condition,
-			":conditionDescription": req.body.conditionDescription,
-			":numberInStock": req.body.numberInStock,
+			":genre": req.body.genre,
+			":cast": req.body.cast,
+			":rating": req.body.rating,
 			":unitCost": req.body.unitCost
 		},
 		ReturnValues: "UPDATED_NEW"
@@ -184,7 +184,7 @@ app.delete('/media/:id', function(req, res) {
 		TableName: mediaSchema.TableName,
 		Key: {
 			tenant_id: tenantId,
-			media_id: req.params.id
+			id: req.params.id
 		}
 	};
 	// construct the helper object

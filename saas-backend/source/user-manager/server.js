@@ -81,7 +81,7 @@ app.use(AWSXRay.express.openSegment('media-manager'));
 //AWSXRay.middleware.enableDynamicNaming('*.example.com');
 
 app.get('/user/health', function (req, res) {
-    res.status(200).send('{"service": "User Manager", "isAlive": "true}');
+    res.status(200).send({service: 'User Manager', isAlive: 'true'});
 });
 
 /**

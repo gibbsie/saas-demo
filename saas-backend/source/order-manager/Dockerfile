@@ -14,4 +14,4 @@ ENV NODE_CONFIG_DIR=/usr/src/app/shared-modules/config-helper/config/
 
 CMD ["node", "./order-manager/server.js"]
 
-EXPOSE 3005
+EXPOSE 3006

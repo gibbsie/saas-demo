@@ -1,8 +1,8 @@
 <ng-include src="'views/media-nav.html'"></ng-include>
 <form role="form">
   <div class="form-group">
-    <label for="sku" class="control-label">SKU</label>
-    <input type="text" ng-model="media.sku" class="form-control" id="sku" required=""/>
+    <label for="id" class="control-label">Media ID</label>
+    <input type="text" ng-model="media.id" class="form-control" id="id" required=""/>
   </div>
   <div class="form-group">
     <label for="title" class="control-label">Title</label>
@@ -13,24 +13,42 @@
     <textarea ng-model="media.description" class="form-control" id="description" required=""></textarea>
   </div>
   <div class="form-group">
-    <label for="condition" class="control-label">Condition</label>
-    <select class="form-control"  id="condition" name="condition" ng-model="media.condition" ng-init="media.condition='Brand New'" required="">
-      <option value='Brand New'>Brand New</option>
-      <option value='Refurbished'2>Refubished</option>
+    <label for="genre" class="control-label">Genre</label>
+    <select class="form-control"  id="genre" name="genre" ng-model="media.genre" ng-init="media.genre='Action'" required="">
+      <option value='Action'>Action</option>
+      <option value='Adventure'>Adventure</option>
+      <option value='Animation'>Animation</option>
+      <option value='Comedy'>Comedy</option>
+      <option value='Crime and Mystery'>Crime and Mystery</option>
+      <option value='Drama'>Drama</option>
+      <option value='Fantasy'>Fantasy</option>
+      <option value='Historical'>Historical</option>
+      <option value='Horror'>Horror</option>
+      <option value='Romance'>Romance</option>
+      <option value='Satire'>Satire</option>
+      <option value='Science Fiction (Sci-Fi)'>Science Fiction (Sci-Fi)</option>
+      <option value='Speculative'>Speculative</option>
+      <option value='True Story'>True Story</option>
+      <option value='Thriller'>Thriller</option>
+      <option value='Western'>Western</option>
       <option value='Scratch and Dent'>Scratch and Dent</option>
     </select>
   </div>
   <div class="form-group">
-    <label for="conditionDescription" class="control-label">Condition Description</label>
-    <textarea ng-model="media.conditionDescription" class="form-control" id="conditionDescription" required=""></textarea>
+    <label for="cast" class="control-label">Cast (comma separated)</label>
+    <textarea ng-model="media.cast" class="form-control" id="cast" required=""></textarea>
   </div>
   <div class="form-group">
-    <label for="numberInStock" class="control-label">Number in Stock</label>
-    <input type="text" ng-model="media.numberInStock" class="form-control" id="numberInStock" required=""/>
+    <label for="rating" class="control-label">Initial Rating</label>
+    <input type="text" ng-model="media.rating" class="form-control" id="rating" required=""/>
   </div>
   <div class="form-group">
     <label for="unitCost" class="control-label">Unit Cost</label>
     <input type="number" ng-model="media.unitCost" class="form-control" id="unitCost" required=""/>
+  </div>
+  <div class="form-group">
+    <input (change)="onMediaPicked($event)" placeholder="Upload Media File" type="file" />
+   <button (click)="onMediaUpload()">Upload Media File</button>
   </div>
   <div class="form-group">
     <input type="submit" class="btn btn-primary" ng-click="saveMedia()" value="Save"/>

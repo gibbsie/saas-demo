@@ -59,7 +59,7 @@ app.use(AWSXRay.express.openSegment('order-manager'));
 //AWSXRay.middleware.enableDynamicNaming('*.example.com');
 
 app.get('/order/health', function(req, res) {
-    res.status(200).send({service: 'Order Manager', isAlive: true});
+    res.status(200).send('{"service":"Order Manager","isAlive":"true"}');
 });
 
 // Create REST entry points

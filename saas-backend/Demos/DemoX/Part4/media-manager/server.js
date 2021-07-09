@@ -40,11 +40,11 @@ var mediaSchema = {
 	TableName: configuration.table.media,
 	KeySchema: [
 		{AttributeName: "tenant_id", KeyType: "HASH"}, //Partition key
-		{AttributeName: "media_id", KeyType: "RANGE"}  //Sort key
+		{AttributeName: "id", KeyType: "RANGE"}  //Sort key
 	],
 	AttributeDefinitions: [
 		{AttributeName: "tenant_id", AttributeType: "S"},
-		{AttributeName: "media_id", AttributeType: "S"}
+		{AttributeName: "id", AttributeType: "S"}
 	],
 	ProvisionedThroughput: {
 		ReadCapacityUnits: 5,
@@ -69,7 +69,7 @@ app.get('/media/:id', function (req, res) {
         // init params structure with request params
         var params = {
             tenant_id: tenantId,
-            media_id: req.params.id
+            id: req.params.id
         };
         // construct the helper object
         var dynamoHelper = new DynamoDBHelper(mediaSchema, credentials, configuration);
@@ -113,7 +113,7 @@ app.post('/media', function(req, res) {
 	tokenManager.getCredentialsFromToken(req, function (credentials) {
 		var media = req.body;
 		var guid = uuidv4();
-		media.media_id = guid;
+		media.id = guid;
 		media.tenant_id = tenantId;
 		// construct the helper object
 		var dynamoHelper = new DynamoDBHelper(mediaSchema, credentials, configuration);
@@ -130,37 +130,37 @@ app.post('/media', function(req, res) {
 });
 
 app.put('/media', function(req, res) {
-	winston.debug('Updating media: ' + req.body.media_id);
+	winston.debug('Updating media: ' + req.body.id);
 	tokenManager.getCredentialsFromToken(req, function (credentials) {
 		// init the params from the request data
 		var keyParams = {
 			tenant_id: tenantId,
-			media_id: req.body.media_id
+			id: req.body.id
 		};
 		var mediaUpdateParams = {
 			TableName: mediaSchema.TableName,
 			Key: keyParams,
 			UpdateExpression: "set " +
-					"sku = :sku, " +
-					"title = :title, " +
-					"description = :description, " +
-					"#condition = :condition, " +
-					"conditionDescription = :conditionDescription, " +
-					"numberInStock = :numberInStock, " +
-					"unitCost = :unitCost",
-			ExpressionAttributeNames: {
-				'#condition': 'condition'
-			},
-			ExpressionAttributeValues: {
-				":sku": req.body.sku,
-				":title": req.body.title,
-				":description": req.body.description,
-				":condition": req.body.condition,
-				":conditionDescription": req.body.conditionDescription,
-				":numberInStock": req.body.numberInStock,
-				":unitCost": req.body.unitCost
-			},
-			ReturnValues: "UPDATED_NEW"
+				"id = :id, " +
+				"title = :title, " +
+				"description = :description, " +
+				"#genre = :genre, " +
+				"cast = :cast, " +
+				"rating = :rating, " +
+				"unitCost = :unitCost",
+		ExpressionAttributeNames: {
+			'#genre': 'genre'
+		},
+		ExpressionAttributeValues: {
+			":id": req.body.id,
+			":title": req.body.title,
+			":description": req.body.description,
+			":genre": req.body.genre,
+			":cast": req.body.cast,
+			":rating": req.body.rating,
+			":unitCost": req.body.unitCost
+		},
+		ReturnValues: "UPDATED_NEW"
 		};
 		// construct the helper object
 		var dynamoHelper = new DynamoDBHelper(mediaSchema, credentials, configuration);
@@ -184,7 +184,7 @@ app.delete('/media/:id', function(req, res) {
 			TableName: mediaSchema.TableName,
 			Key: {
 				tenant_id: tenantId,
-				media_id: req.params.id
+				id: req.params.id
 			}
 		};
 		// construct the helper object

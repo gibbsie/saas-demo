@@ -33,10 +33,10 @@ app.use(function(req, res, next) {
 var mediaSchema = {
 	TableName: configuration.table.media,
 	KeySchema: [
-		{AttributeName: "media_id", KeyType: "HASH"}  //Partition key
+		{AttributeName: "id", KeyType: "HASH"}  //Partition key
 	],
 	AttributeDefinitions: [
-		{AttributeName: "media_id", AttributeType: "S"}
+		{AttributeName: "id", AttributeType: "S"}
 	],
 	ProvisionedThroughput: {
 		ReadCapacityUnits: 5,
@@ -51,7 +51,7 @@ app.use(AWSXRay.express.openSegment('media-manager'));
 //AWSXRay.middleware.enableDynamicNaming('*.example.com');
 
 app.get('/media/health', function(req, res) {
-	res.status(200).send({service: 'Media Manager', isAlive: true});
+	res.status(200).send({service: 'Media Manager', isAlive: 'true'});
 });
 
 // Create REST entry points
@@ -59,7 +59,7 @@ app.get('/media/:id', function(req, res) {
 	winston.debug('Fetching media: ' + req.params.id);
 	// init params structure with request params
 	var params = {
-		media_id: req.params.id
+		id: req.params.id
 	};
 	tokenManager.getSystemCredentials(function(credentials) {
 		// construct the helper object
@@ -95,10 +95,31 @@ app.get('/media', function(req, res) {
 	});
 });
 
+app.get('/media/play/:id', function(req, res) {
+	winston.debug('Fetching media: ' + req.params.id);
+	// init params structure with request params
+	var params = {
+		id: req.params.id
+	};
+	tokenManager.getSystemCredentials(function(credentials) {
+		// construct the helper object
+		var dynamoHelper = new DynamoDBHelper(mediaSchema, credentials, configuration);
+		dynamoHelper.getItem(params, credentials, function(err, media) {
+			if (err) {
+				winston.error('Error getting media: ' + err.message);
+				res.status(400).send('{"Error": "Error getting media"}');
+			} else {
+				winston.debug('Media ' + req.params.id + ' retrieved');
+				res.status(200).send(media);
+			}
+		});
+	});
+});
+
 app.post('/media', function(req, res) {
 	var media = req.body;
 	var guid = uuidv4();
-	media.media_id = guid;
+	media.id = guid;
 	winston.debug(JSON.stringify(media));
 	// construct the helper object
 	tokenManager.getSystemCredentials(function(credentials) {
@@ -116,32 +137,32 @@ app.post('/media', function(req, res) {
 });
 
 app.put('/media', function(req, res) {
-	winston.debug('Updating media: ' + req.body.media_id);
+	winston.debug('Updating media: ' + req.body.id);
 	// init the params from the request data
 	var keyParams = {
-		media_id: req.body.media_id
+		id: req.body.id
 	};
 	var mediaUpdateParams = {
 		TableName: mediaSchema.TableName,
 		Key: keyParams,
 		UpdateExpression: "set " +
-				"sku = :sku, " +
+				"id = :id, " +
 				"title = :title, " +
 				"description = :description, " +
-				"#condition = :condition, " +
-				"conditionDescription = :conditionDescription, " +
-				"numberInStock = :numberInStock, " +
+				"#genre = :genre, " +
+				"cast = :cast, " +
+				"rating = :rating, " +
 				"unitCost = :unitCost",
 		ExpressionAttributeNames: {
-			'#condition': 'condition'
+			'#genre': 'genre'
 		},
 		ExpressionAttributeValues: {
-			":sku": req.body.sku,
+			":id": req.body.id,
 			":title": req.body.title,
 			":description": req.body.description,
-			":condition": req.body.condition,
-			":conditionDescription": req.body.conditionDescription,
-			":numberInStock": req.body.numberInStock,
+			":genre": req.body.genre,
+			":cast": req.body.cast,
+			":rating": req.body.rating,
 			":unitCost": req.body.unitCost
 		},
 		ReturnValues: "UPDATED_NEW"
@@ -167,7 +188,7 @@ app.delete('/media/:id', function(req, res) {
 	var deleteMediaParams = {
 		TableName: mediaSchema.TableName,
 		Key: {
-			media_id: req.params.id
+			id: req.params.id
 		}
 	};
 	// construct the helper object

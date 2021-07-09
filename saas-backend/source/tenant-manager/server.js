@@ -53,7 +53,7 @@ app.use(AWSXRay.express.openSegment('tenant-manager'));
 //AWSXRay.middleware.enableDynamicNaming('*.example.com');
 
 app.get('/tenant/health', function(req, res) {
-    res.status(200).send({service: 'Tenant Manager', isAlive: true});
+    res.status(200).send({service: 'Tenant Manager', isAlive: 'true'});
 });
 
 // Create REST entry points

@@ -358,7 +358,7 @@ Resources:
         - Name: product-manager
           Image: !Sub ${AWS::AccountId}.dkr.ecr.${AWS::Region}.amazonaws.com/${ECSRepository}:latest
           PortMappings:
-            - ContainerPort: 3006
+            - ContainerPort: 3007
           LogConfiguration:
             LogDriver: awslogs
             Options:
@@ -454,7 +454,7 @@ Resources:
             - !Ref SubnetPrivateB
       LoadBalancers:
         - ContainerName: product-manager
-          ContainerPort: 3006
+          ContainerPort: 3007
           TargetGroupArn: !Ref ALBTargetGroup
 # Don't deploy the product service or make the product service DynamoDB table
 # now. Let the attendee do it as part of Lab2.
