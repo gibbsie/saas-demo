@@ -3,30 +3,33 @@
 </div>
 <table class="table table-striped">
   <thead>
-    <th>SKU</th>
+    <th>Media ID</th>
     <th>Title</th>
-    <th>Condition</th>
-    <th>In Stock</th>
+    <th>Description</th>
+    <th>Genre</th>
+    <th>Cast</th>
     <th>Unit Cost</th>
     <th ng-if="isTenantAdminUser()"></th>
   </thead>
   <tbody>
     <col width="15%">
     <col width="25%">
-    <col width="23%">
     <col width="15%">
+    <col width="10%">
     <col width="15%">
+    <col width="10%">
     <col ng-if="isTenantAdminUser()" width="7%">
     <tr ng-repeat="media in medias">
-      <td><a ng-href="/#!/media/{{ media.media_id }}">{{ media.sku }}</a></td>
+      <td><a ng-href="/#!/media/{{ media.id }}">{{ media.id }}</a></td>
       <td>{{ media.title }}</td>
-      <td>{{ media.condition }}</td>
-      <td>{{ media.numberInStock }}</td>
+      <td>{{ media.description }}</td>
+      <td>{{ media.genre }}</td>
+      <td>{{ media.cast }}</td>
       <td>{{ media.unitCost | currency }}</td>
       <td ng-if="isTenantAdminUser()">
         <div class="button-group">
-          <a ng-href="/#!/media/edit/{{ media.media_id }}"><span class="glyphicon glyphicon-pencil"></span></a>
-          <a ng-href="/#!/media/delete/{{ media.media_id }}"><span class="glyphicon glyphicon-trash"></span></a>
+          <a ng-href="/#!/media/edit/{{ media.id }}"><span class="glyphicon glyphicon-pencil"></span></a>
+          <a ng-href="/#!/media/delete/{{ media.id }}"><span class="glyphicon glyphicon-trash"></span></a>
         </div>
       </td>
     </tr>

@@ -1,0 +1,11 @@
+{
+  "logs": {
+    "csm": {
+      "service_addresses": ["udp4://127.0.0.1:31000", "udp6://[::1]:31000"],
+      "memory_limit_in_mb": 20
+    },
+    "metrics_collected": {
+      "emf": {}
+    }
+  }
+}
